@@ -23,18 +23,25 @@ public class ArtilleryMap extends JPanel implements Runnable {
 
   Thread animationThread;
 
+  // AIM
+  CursorAimLine horizontalAim;
+  CursorAimLine verticalAim;
+
   public ArtilleryMap(int fps) {
     // engine
     this.fps = fps;
-    // center = new Point(960, 540);
 
     // swing things
     setLayout(null);
     setBackground(Color.decode("#3179d4"));
 
+    horizontalAim = new CursorAimLine(CursorAimLine.AimAxis.horizontal);
+    verticalAim = new CursorAimLine(CursorAimLine.AimAxis.vertial);
+    add(horizontalAim);
+    add(verticalAim);
+
     // layers
     layers = new ArrayList<JLabel>();
-
     addLayer("Map_Cross_Grid");
     addLayer("Map_Snow");
     addLayer("Map_Mountain2");
@@ -89,6 +96,11 @@ public class ArtilleryMap extends JPanel implements Runnable {
     cursorPosition = MouseInfo.getPointerInfo().getLocation();
     center.move((int) getLocationOnScreen().getX() + 250, (int) getLocationOnScreen().getY() + 250);
 
+    // Aim
+    horizontalAim.setPositionInAxis((int) (cursorPosition.getX() - center.getX() + 250));
+    verticalAim.setPositionInAxis((int) (cursorPosition.getY() - center.getY() + 250));
+
+    // Layers parallax efect
     for (int i = 0; i < layers.size(); i++) {
       // TODO: calcular una sola vez
       double layerWeigth = (i + 1) * 10;
@@ -119,6 +131,31 @@ public class ArtilleryMap extends JPanel implements Runnable {
       return max;
     } else {
       return value;
+    }
+  }
+
+  private class CursorAimLine extends JPanel {
+
+    public enum AimAxis {
+      horizontal,
+      vertial
+    }
+
+    AimAxis axis;
+    private static int stroke = 3;
+
+    public CursorAimLine(AimAxis axis) {
+      this.axis = axis;
+      setOpaque(true);
+      setBackground(Color.red);
+    }
+
+    public void setPositionInAxis(int positionInAxis) {
+      if (this.axis == AimAxis.horizontal) {
+        this.setBounds(positionInAxis, 0, CursorAimLine.stroke, 500);
+      } else {
+        this.setBounds(0, positionInAxis, 500, CursorAimLine.stroke);
+      }
     }
   }
 }
