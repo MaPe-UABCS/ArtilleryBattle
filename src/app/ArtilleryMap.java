@@ -3,9 +3,13 @@ package app;
 import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridLayout;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import javax.swing.AbstractButton;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -28,6 +32,8 @@ public class ArtilleryMap extends JPanel implements Runnable {
   CursorAimLine horizontalAim;
   CursorAimLine verticalAim;
 
+  ArrayList<AbstractButton> buttonsWithActionListener;
+
   public ArtilleryMap(int fps) {
     // engine
     this.fps = fps;
@@ -36,6 +42,7 @@ public class ArtilleryMap extends JPanel implements Runnable {
     // swing things
     setLayout(null);
     setBackground(Color.black);
+    buttonsWithActionListener = new ArrayList<AbstractButton>();
 
     horizontalAim = new CursorAimLine(CursorAimLine.AimAxis.horizontal);
     verticalAim = new CursorAimLine(CursorAimLine.AimAxis.vertial);
@@ -52,6 +59,22 @@ public class ArtilleryMap extends JPanel implements Runnable {
     addLayer("MapL5");
     addLayer("MapL6");
     animationThread = new Thread(this);
+
+    // buttons
+    GridLayout gridLayout = new GridLayout(10, 10);
+    gridLayout.setHgap(0);
+    gridLayout.setVgap(0);
+    JPanel buttonsGrid = new JPanel(gridLayout);
+    for (int r = 0; r < 10; r++) {
+      for (int c = 0; c < 10; c++) {
+        GridButton gridButton = new GridButton(c, r);
+        buttonsGrid.add(gridButton);
+        buttonsWithActionListener.add(gridButton);
+      }
+    }
+    buttonsGrid.setBounds(0, 0, 800, 800);
+
+    add(buttonsGrid);
   }
 
   private void addLayer(String imageName) {
@@ -118,7 +141,7 @@ public class ArtilleryMap extends JPanel implements Runnable {
     // Layers parallax efect
     for (int i = 0; i < layers.size(); i++) {
       // TODO: calcular una sola vez
-      double layerWeigth = (i + 1) * 10;
+      double layerWeigth = (i) * 10;
       double cursorXMin = center.getX() - minScreenDimention / 2;
       double cursorXMax = center.getX() + minScreenDimention / 2;
       // -----------------------------
@@ -149,6 +172,18 @@ public class ArtilleryMap extends JPanel implements Runnable {
     }
   }
 
+  private class GridButton extends JButton {
+    public GridButton(int x, int y) {
+      setActionCommand("map:" + x + "," + y);
+      // setOpaque(false);
+      // setContentAreaFilled(false);
+      setBorderPainted(false);
+      setFocusPainted(false);
+      setBackground(Color.black);
+      // setBackground(Color.red);
+    }
+  }
+
   private class CursorAimLine extends JPanel {
 
     public enum AimAxis {
@@ -171,6 +206,12 @@ public class ArtilleryMap extends JPanel implements Runnable {
       } else {
         this.setBounds(0, positionInAxis, 800, CursorAimLine.stroke);
       }
+    }
+  }
+
+  public void setActionListener(ActionListener listener) {
+    for (AbstractButton button : buttonsWithActionListener) {
+      button.addActionListener(listener);
     }
   }
 }
