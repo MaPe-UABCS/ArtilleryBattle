@@ -14,14 +14,14 @@ public class Main extends JFrame {
 
     // frame config
     setLayout(new BorderLayout());
-    setSize(500, 500);
+    setSize(800, 800);
     setLocationRelativeTo(null);
     setTitle("ArtilleryBattle");
     setDefaultCloseOperation(EXIT_ON_CLOSE);
 
     // adding componetns
     ArtilleryMap anim = new ArtilleryMap(60);
-    anim.setBounds(0, 0, 500, 500);
+    anim.setBounds(0, 0, 800, 800);
     body.add(anim);
 
     // set setVisible

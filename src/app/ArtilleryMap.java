@@ -22,6 +22,7 @@ public class ArtilleryMap extends JPanel implements Runnable {
   int minScreenDimention;
 
   Thread animationThread;
+  boolean animationRuning;
 
   // AIM
   CursorAimLine horizontalAim;
@@ -30,10 +31,11 @@ public class ArtilleryMap extends JPanel implements Runnable {
   public ArtilleryMap(int fps) {
     // engine
     this.fps = fps;
+    animationRuning = false;
 
     // swing things
     setLayout(null);
-    setBackground(Color.decode("#3179d4"));
+    setBackground(Color.black);
 
     horizontalAim = new CursorAimLine(CursorAimLine.AimAxis.horizontal);
     verticalAim = new CursorAimLine(CursorAimLine.AimAxis.vertial);
@@ -42,19 +44,19 @@ public class ArtilleryMap extends JPanel implements Runnable {
 
     // layers
     layers = new ArrayList<JLabel>();
-    addLayer("Map_Cross_Grid");
-    addLayer("Map_Snow");
-    addLayer("Map_Mountain2");
-    addLayer("Map_Mountain1");
-    addLayer("Map_Land2");
-    addLayer("Map_Land1");
-    addLayer("Map_Sand");
+    addLayer("GridM2");
+    addLayer("MapL1");
+    addLayer("MapL2");
+    addLayer("MapL3");
+    addLayer("MapL4");
+    addLayer("MapL5");
+    addLayer("MapL6");
     animationThread = new Thread(this);
   }
 
   private void addLayer(String imageName) {
     JLabel layer = new JLabel(AssetManager.getImageIcon(imageName));
-    layer.setBounds(0, 0, 500, 500);
+    layer.setBounds(0, 0, 800, 800);
     layers.add(layer);
     this.add(layer);
   }
@@ -65,7 +67,8 @@ public class ArtilleryMap extends JPanel implements Runnable {
     if (center == null) {
       center =
           new Point(
-              (int) getLocationOnScreen().getX() + 250, (int) getLocationOnScreen().getY() + 250);
+              (int) getLocationOnScreen().getX() + getWidth() / 2,
+              (int) getLocationOnScreen().getY() + getHeight() / 2);
     }
 
     while (animationThread.isAlive()) {
@@ -81,24 +84,36 @@ public class ArtilleryMap extends JPanel implements Runnable {
   }
 
   public void startAnimation() {
-    animationThread.start();
     graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
     screenWidth = graphicsDevice.getDisplayMode().getWidth();
     screenHeight = graphicsDevice.getDisplayMode().getHeight();
     minScreenDimention = screenWidth > screenHeight ? screenHeight : screenWidth;
+    resumeAnimation();
+    animationThread.start();
+  }
+
+  public void pauseAnimation() {
+    animationRuning = false;
+  }
+
+  public void resumeAnimation() {
+    animationRuning = true;
   }
 
   // call every frame
   public void update() {
+    if (!animationRuning) return;
     // TODO: Solo ejecuta el resto del metodo si es visible en pantalla, o si un try get screen
     // location falla retornar
 
     cursorPosition = MouseInfo.getPointerInfo().getLocation();
-    center.move((int) getLocationOnScreen().getX() + 250, (int) getLocationOnScreen().getY() + 250);
+    center.move(
+        (int) getLocationOnScreen().getX() + getWidth() / 2,
+        (int) getLocationOnScreen().getY() + getHeight() / 2);
 
     // Aim
-    horizontalAim.setPositionInAxis((int) (cursorPosition.getX() - center.getX() + 250));
-    verticalAim.setPositionInAxis((int) (cursorPosition.getY() - center.getY() + 250));
+    horizontalAim.setPositionInAxis((int) (cursorPosition.getX() - center.getX() + getWidth() / 2));
+    verticalAim.setPositionInAxis((int) (cursorPosition.getY() - center.getY() + getHeight() / 2));
 
     // Layers parallax efect
     for (int i = 0; i < layers.size(); i++) {
@@ -120,7 +135,7 @@ public class ArtilleryMap extends JPanel implements Runnable {
       int y = (int) (0 + (layerWeigth * yWeigth));
 
       JLabel layer = layers.get(i);
-      layer.setBounds(x, y, 500, 500);
+      layer.setBounds(x, y, 800, 800);
     }
   }
 
@@ -142,19 +157,19 @@ public class ArtilleryMap extends JPanel implements Runnable {
     }
 
     AimAxis axis;
-    private static int stroke = 3;
+    private static int stroke = 1;
 
     public CursorAimLine(AimAxis axis) {
       this.axis = axis;
       setOpaque(true);
-      setBackground(Color.red);
+      setBackground(Color.gray);
     }
 
     public void setPositionInAxis(int positionInAxis) {
       if (this.axis == AimAxis.horizontal) {
-        this.setBounds(positionInAxis, 0, CursorAimLine.stroke, 500);
+        this.setBounds(positionInAxis, 0, CursorAimLine.stroke, 800);
       } else {
-        this.setBounds(0, positionInAxis, 500, CursorAimLine.stroke);
+        this.setBounds(0, positionInAxis, 800, CursorAimLine.stroke);
       }
     }
   }
