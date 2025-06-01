@@ -1,60 +1,58 @@
 package app;
 
 import java.awt.Font;
-import java.io.File;
-import java.net.URL;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 
 public class AssetManager {
-  private static HashMap<String, ImageIcon> imageIcons;
-  private static Font font;
+  public static AssetManager sharedInstance;
 
-  public static void loadAssets(String assetsDirectoryPath) {
-    imageIcons = new HashMap<String, ImageIcon>();
+  private HashMap<String, ImageIcon> imageIcons;
+  private HashMap<String, AudioInputStream> audioInputStreams;
+  private Font font;
 
-    File sourceFolder = new File(assetsDirectoryPath);
-    if (sourceFolder.exists() && sourceFolder.isDirectory()) {
-      try {
-        File[] assetsFilesArray = sourceFolder.listFiles();
-
-        if (assetsFilesArray != null) {
-          for (File assetFile : assetsFilesArray) {
-            String fileName = assetFile.getName();
-            if (fileName.endsWith(".png")
-                || fileName.endsWith(".gif")
-                || fileName.endsWith(".jpg")) {
-              // if (assetFile != null) {
-              // Image spriteImage = ImageIO.read(assetFile);
-              // System.out.println();
-              // Image image = ImageIO.read(AssetManager.class.getResource(assetFile.getPath()));
-
-              String imageRoute = assetFile.getPath();
-              URL imageURl = Main.class.getResource(assetFile.getPath());
-              ImageIcon image = new ImageIcon(imageRoute);
-
-              String imageName = assetFile.getName().split("\\.")[0];
-              imageIcons.put(imageName, image);
-              // }
-            } else if (fileName.endsWith(".ttf")) {
-              font = Font.createFont(Font.TRUETYPE_FONT, assetFile).deriveFont(20f);
-            }
-          }
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    } else {
-      System.out.println("what?");
-      throw new RuntimeException(assetsDirectoryPath + " , is not a valid Directory.");
+  public AssetManager() {
+    if (sharedInstance == null) {
+      sharedInstance = this;
     }
   }
 
+  public Clip getAudio(String name) {
+    // try {
+    //   AudioInputStream audioInputStream = audioInputStreams.get(name);
+    //   Clip clip = AudioSystem.getClip();
+    //   clip.open(audioInputStream);
+    //   return clip;
+    // } catch (Exception e) {
+    //   System.out.println(e.getMessage());
+    // }
+    return null;
+  }
+
   public static ImageIcon getImageIcon(String name) {
-    return imageIcons.get(name);
+    if (sharedInstance.imageIcons == null) {
+      sharedInstance.imageIcons = new HashMap<String, ImageIcon>();
+    }
+
+    ImageIcon imageIcon = sharedInstance.imageIcons.get(name);
+    if (imageIcon == null) {
+      try {
+        BufferedImage bufferedImage =
+            ImageIO.read(sharedInstance.getClass().getResourceAsStream("/img/" + name));
+        imageIcon = new ImageIcon(bufferedImage);
+        sharedInstance.imageIcons.put(name, imageIcon);
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+      }
+    }
+    return imageIcon;
   }
 
   public static Font getFont() {
-    return font;
+    return sharedInstance.font;
   }
 }

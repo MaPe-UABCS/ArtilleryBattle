@@ -1,5 +1,6 @@
-package app;
+package app.views.components;
 
+import app.AssetManager;
 import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -32,6 +33,12 @@ public class ArtilleryMap extends JPanel implements Runnable {
   CursorAimLine horizontalAim;
   CursorAimLine verticalAim;
 
+  // PauseScreen
+  JPanel buttonsGrid;
+  JLabel pauseScreen;
+
+  GridButton buttonsMatrix[][];
+
   ArrayList<AbstractButton> buttonsWithActionListener;
 
   public ArtilleryMap(int fps) {
@@ -44,6 +51,14 @@ public class ArtilleryMap extends JPanel implements Runnable {
     setBackground(Color.black);
     buttonsWithActionListener = new ArrayList<AbstractButton>();
 
+    // pause screen
+    pauseScreen = new JLabel("Waiting for Command autorization...");
+    pauseScreen.setOpaque(true);
+    pauseScreen.setBounds(0, 0, 800, 800);
+    pauseScreen.setBackground(Color.black);
+    pauseScreen.setForeground(Color.green);
+
+    // cursor
     horizontalAim = new CursorAimLine(CursorAimLine.AimAxis.horizontal);
     verticalAim = new CursorAimLine(CursorAimLine.AimAxis.vertial);
     add(horizontalAim);
@@ -51,30 +66,34 @@ public class ArtilleryMap extends JPanel implements Runnable {
 
     // layers
     layers = new ArrayList<JLabel>();
-    addLayer("GridM2");
-    addLayer("MapL1");
-    addLayer("MapL2");
-    addLayer("MapL3");
-    addLayer("MapL4");
-    addLayer("MapL5");
-    addLayer("MapL6");
+    addLayer("GridM2.png");
+    addLayer("MapL1.png");
+    addLayer("MapL2.png");
+    addLayer("MapL3.png");
+    addLayer("MapL4.png");
+    addLayer("MapL5.png");
+    addLayer("MapL6.png");
     animationThread = new Thread(this);
 
     // buttons
+    buttonsMatrix = new GridButton[10][10];
     GridLayout gridLayout = new GridLayout(10, 10);
     gridLayout.setHgap(0);
     gridLayout.setVgap(0);
-    JPanel buttonsGrid = new JPanel(gridLayout);
+    buttonsGrid = new JPanel(gridLayout);
     for (int r = 0; r < 10; r++) {
       for (int c = 0; c < 10; c++) {
         GridButton gridButton = new GridButton(c, r);
+        buttonsMatrix[c][r] = gridButton;
         buttonsGrid.add(gridButton);
         buttonsWithActionListener.add(gridButton);
       }
     }
     buttonsGrid.setBounds(0, 0, 800, 800);
-
     add(buttonsGrid);
+
+    // always at the end
+    setMapActive(false);
   }
 
   private void addLayer(String imageName) {
@@ -106,21 +125,44 @@ public class ArtilleryMap extends JPanel implements Runnable {
     }
   }
 
+  public enum CellStatuses {
+    hit,
+    blank,
+  }
+
+  public void setCellStatus(int column, int row, CellStatuses status) {
+    // TODO: aparecer un flash de blanco y rojo animacion disparo parpadeo, independientemente del
+    // resultado, sonido asi de click disparo explocion bit moderno aestetic
+    if (status == CellStatuses.hit) {
+      buttonsMatrix[column][row].setAsHit();
+    } else if (status == CellStatuses.blank) {
+      buttonsMatrix[column][row].setAsBlank();
+    }
+  }
+
   public void startAnimation() {
     graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
     screenWidth = graphicsDevice.getDisplayMode().getWidth();
     screenHeight = graphicsDevice.getDisplayMode().getHeight();
     minScreenDimention = screenWidth > screenHeight ? screenHeight : screenWidth;
-    resumeAnimation();
     animationThread.start();
   }
 
-  public void pauseAnimation() {
-    animationRuning = false;
-  }
-
-  public void resumeAnimation() {
-    animationRuning = true;
+  public void setMapActive(boolean active) {
+    animationRuning = active;
+    if (active) {
+      remove(pauseScreen);
+      for (JLabel layer : layers) {
+        add(layer);
+      }
+      add(buttonsGrid);
+    } else {
+      remove(buttonsGrid);
+      for (JLabel layer : layers) {
+        remove(layer);
+      }
+      add(pauseScreen);
+    }
   }
 
   // call every frame
@@ -175,12 +217,22 @@ public class ArtilleryMap extends JPanel implements Runnable {
   private class GridButton extends JButton {
     public GridButton(int x, int y) {
       setActionCommand("map:" + x + "," + y);
-      // setOpaque(false);
+      // setOpaque(true);
       // setContentAreaFilled(false);
       setBorderPainted(false);
       setFocusPainted(false);
       setBackground(Color.black);
       // setBackground(Color.red);
+    }
+
+    public void setAsBlank() {
+      // TODO: llamar al asset manager y colocar algun tipo circulo o punto, blanco o gris
+      setBackground(Color.white);
+    }
+
+    public void setAsHit() {
+      // TODO: llamar al asset manager y colocar un icono de hit una cruz o algo de color rojo
+      setBackground(Color.red);
     }
   }
 

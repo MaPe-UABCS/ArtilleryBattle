@@ -5,8 +5,8 @@
 mkdir -p bin
 
 # Jars
-mkdir -p lib
-jars="lib/$(/usr/bin/ls -1 lib)"
+mkdir -p src/lib
+jars="src/lib/$(/usr/bin/ls -1 src/lib)"
 jars=$(echo $jars | sed 's/ /:lib\//g')
 
 # Compile and run ヾ(⌐■_■)ノ♪
