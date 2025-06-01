@@ -51,8 +51,7 @@ public class Main extends JFrame implements ActionListener {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    System.out.println("playing sound");
-    // SoundManager.sharedInstance.playSound("Alert sound 2");
+    SoundManager.playSound("Alert sound 2.wav");
   }
 
   private void readMousePos() {}

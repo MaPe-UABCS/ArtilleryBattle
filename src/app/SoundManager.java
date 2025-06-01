@@ -12,20 +12,8 @@ public class SoundManager {
     }
   }
 
-  public void playSound(String soundName) {
-//    Clip audioClip = AssetManager.getAudio(soundName);
-//    audioClip.start();
-//    Thread stopThread =
-//        new Thread() {
-//          public void start() {
-//            while (!audioClip.isRunning()) {
-//              audioClip.stop();
-//              System.out.println("stoping sound");
-//              break;
-//            }
-//          }
-//          ;
-//        };
-//    stopThread.start();
+  public static void playSound(String soundName) {
+    Clip audioClip = AssetManager.getAudio(soundName);
+    audioClip.start();
   }
 }
