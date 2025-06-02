@@ -13,12 +13,13 @@ import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 
 public class AssetManager {
-  public static AssetManager sharedInstance;
+  private static AssetManager sharedInstance;
 
   private HashMap<String, ImageIcon> imageIcons;
   private HashMap<String, URL> audioURls;
   private HashMap<String, Font> derivedFonts;
-  private Font font;
+  private Font thinFont;
+  private Font ligthFont;
 
   public AssetManager() {
     if (sharedInstance == null) {
@@ -29,10 +30,14 @@ public class AssetManager {
     derivedFonts = new HashMap<String, Font>();
 
     try {
-      font =
+      thinFont =
           Font.createFont(
               Font.TRUETYPE_FONT,
               getClass().getResourceAsStream("/fonts/IosevkaTermNerdFontPropo-Thin.ttf"));
+      ligthFont =
+          Font.createFont(
+              Font.TRUETYPE_FONT,
+              getClass().getResourceAsStream("/fonts/IosevkaTermNerdFontPropo-Light.ttf"));
     } catch (IOException | FontFormatException e) {
       System.out.println(e.getMessage());
     }
@@ -58,8 +63,6 @@ public class AssetManager {
   }
 
   public static ImageIcon getImageIcon(String name) {
-    if (sharedInstance.imageIcons == null) {}
-
     ImageIcon imageIcon = sharedInstance.imageIcons.get(name);
     if (imageIcon == null) {
       try {
@@ -74,17 +77,18 @@ public class AssetManager {
     return imageIcon;
   }
 
-  /* getFont (String fontCommand)
-   *
-   * examples:
-   *    "20:Font.PLAIN"
-   *    "14:Font.BOLD"
+  /* getFont ("thin:20:bold")
+  /* getFont ("light:20:bold")
    */
   public static Font getFont(String fontCommand) {
     Font font = sharedInstance.derivedFonts.get(fontCommand);
+
+    String[] commandArray = fontCommand.split(":");
+
     if (font == null) {
       int style = Font.PLAIN;
-      String fontType = fontCommand.split(":")[1].toLowerCase();
+
+      String fontType = commandArray[2].toLowerCase();
       switch (fontType) {
         case "bold":
           style = Font.BOLD;
@@ -98,8 +102,20 @@ public class AssetManager {
         default:
           throw new RuntimeException("Font type: " + fontType + " is not valid");
       }
-      int size = Integer.parseInt(fontCommand.split(":")[0]);
-      font = sharedInstance.font.deriveFont(style, size);
+
+      int size = Integer.parseInt(commandArray[1]);
+
+      switch (commandArray[0].toLowerCase()) {
+        case "thin":
+          font = sharedInstance.thinFont.deriveFont(style, size);
+          break;
+        case "light":
+          font = sharedInstance.ligthFont.deriveFont(style, size);
+          break;
+        default:
+          throw new RuntimeException("Font variation not found");
+      }
+
       sharedInstance.derivedFonts.put(fontCommand, font);
     }
     return font;

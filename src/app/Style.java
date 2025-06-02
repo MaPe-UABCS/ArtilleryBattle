@@ -1,35 +1,25 @@
 package app;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Style {
 
-  public enum AppColorsDefinitions {
-    background,
-    primary,
-    secondary,
-    danger,
-  }
+  public static final int background = 0;
+  public static final int foreground = 1;
+  public static final int primary = 2;
+  public static final int secondary = 3;
+  public static final int danger = 4;
 
-  public static Map<AppColorsDefinitions, Color> Colors =
+  private static Map<Integer, Color> Colors =
       Map.of(
-          AppColorsDefinitions.background, Color.decode("#000000"),
-          AppColorsDefinitions.primary, Color.decode("#000000"),
-          AppColorsDefinitions.secondary, Color.decode("#000000"),
-          AppColorsDefinitions.danger, Color.decode("#000000"));
+          background, Color.decode("#000000"),
+          foreground, Color.decode("#ffffff"),
+          primary, Color.decode("#1faf30"),
+          secondary, Color.decode("#000000"),
+          danger, Color.decode("#000000"));
 
-  private static HashMap<Float, Font> loadedFonts = new HashMap<Float, Font>();
-
-  public static Font getFont(float size) {
-    Font font = loadedFonts.get(size);
-    if (font == null) {
-      font = AssetManager.getFont().deriveFont(size);
-      loadedFonts.put(size, font);
-    }
-
-    return font;
+  public static Color getColor(int color) {
+    return Colors.get(color);
   }
 }

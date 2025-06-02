@@ -1,10 +1,12 @@
 package app;
 
-import app.views.components.ArtilleryMap;
+import app.views.LoginView;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class Main extends JFrame implements ActionListener {
@@ -19,33 +21,35 @@ public class Main extends JFrame implements ActionListener {
 
     body = new JPanel();
     body.setLayout(null);
+    body.setBackground(Style.getColor(Style.background));
+    body.setPreferredSize(new Dimension(600, 600));
 
     // frame config
     setLayout(new BorderLayout());
-    setSize(800, 800);
+    // setSize(600 + getInsets().left + getInsets().right, 600 + getInsets().top +
     setLocationRelativeTo(null);
+    setResizable(false);
     setTitle("ArtilleryBattle");
     setDefaultCloseOperation(EXIT_ON_CLOSE);
+    // --------------
 
-    // adding componetns
-    ArtilleryMap anim = new ArtilleryMap(60);
-    anim.setBounds(0, 0, 800, 800);
-    body.add(anim);
+    // TODO: check the prefs an see if the user has logged in before
+    // TEST delete later
+    LoginView loginView = new LoginView("login");
+    body.add(loginView);
+    // --------------
 
     // set setVisible
     add(body);
+    this.pack();
     setVisible(true);
-    anim.setMapActive(true);
-    anim.setActionListener(this);
-    anim.startAnimation();
+    // --------------
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
     SoundManager.playSound("Alert sound 2.wav");
   }
-
-  private void readMousePos() {}
 
   public static void main(String[] args) {
     new Main();
