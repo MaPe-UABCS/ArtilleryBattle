@@ -1,19 +1,30 @@
 package app;
 
 import app.views.LoginView;
+import app.views.MainMenuView;
+import app.views.View;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.HashMap;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class Main extends JFrame implements ActionListener {
+public class Main extends JFrame {
+
+  private static Main sharedInstance;
 
   private JPanel body;
 
+  private HashMap<String, View> programViews;
+  private View currentView;
+
   public Main() {
+    if (sharedInstance == null) {
+      sharedInstance = this;
+    }
+
+    programViews = new HashMap<String, View>();
+    currentView = null;
     // singletons
     new SoundManager();
     new AssetManager();
@@ -34,9 +45,8 @@ public class Main extends JFrame implements ActionListener {
     // --------------
 
     // TODO: check the prefs an see if the user has logged in before
-    // TEST delete later
-    LoginView loginView = new LoginView("login");
-    body.add(loginView);
+    programViews.put("Login", new LoginView());
+    programViews.put("MainMenu", new MainMenuView());
     // --------------
 
     // set setVisible
@@ -44,11 +54,19 @@ public class Main extends JFrame implements ActionListener {
     this.pack();
     setVisible(true);
     // --------------
+    changeView("MainMenu");
   }
 
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    SoundManager.playSound("Alert sound 2.wav");
+  public static void changeView(String viewName) {
+    if (sharedInstance.currentView != null) {
+      sharedInstance.body.remove(sharedInstance.currentView);
+    }
+    sharedInstance.currentView = sharedInstance.programViews.get(viewName);
+    if (sharedInstance.currentView == null) {
+      throw new RuntimeException(viewName + " does not exists");
+    }
+    sharedInstance.body.add(sharedInstance.currentView);
+    sharedInstance.currentView.before();
   }
 
   public static void main(String[] args) {

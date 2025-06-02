@@ -21,8 +21,8 @@ public class LoginView extends View {
   AppInputField userNameField;
   JPasswordField passwordField;
 
-  public LoginView(String viewName) {
-    super(viewName);
+  public LoginView() {
+    super("Login");
     setOpaque(false);
 
     GridBagConstraints gbc = new GridBagConstraints();
@@ -94,7 +94,7 @@ public class LoginView extends View {
   }
 
   public void before() {
-    System.out.println("._.");
+    System.out.println("Login biew beofre executing");
   }
 
   public void resetForm() {
