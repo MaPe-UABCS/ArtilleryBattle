@@ -1,7 +1,9 @@
 package app;
 
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import javax.imageio.ImageIO;
@@ -15,6 +17,7 @@ public class AssetManager {
 
   private HashMap<String, ImageIcon> imageIcons;
   private HashMap<String, URL> audioURls;
+  private HashMap<String, Font> derivedFonts;
   private Font font;
 
   public AssetManager() {
@@ -23,6 +26,16 @@ public class AssetManager {
     }
     imageIcons = new HashMap<String, ImageIcon>();
     audioURls = new HashMap<String, URL>();
+    derivedFonts = new HashMap<String, Font>();
+
+    try {
+      font =
+          Font.createFont(
+              Font.TRUETYPE_FONT,
+              getClass().getResourceAsStream("/fonts/IosevkaTermNerdFontPropo-Thin.ttf"));
+    } catch (IOException | FontFormatException e) {
+      System.out.println(e.getMessage());
+    }
   }
 
   public static Clip getAudio(String name) {
@@ -61,7 +74,34 @@ public class AssetManager {
     return imageIcon;
   }
 
-  public static Font getFont() {
-    return sharedInstance.font;
+  /* getFont (String fontCommand)
+   *
+   * examples:
+   *    "20:Font.PLAIN"
+   *    "14:Font.BOLD"
+   */
+  public static Font getFont(String fontCommand) {
+    Font font = sharedInstance.derivedFonts.get(fontCommand);
+    if (font == null) {
+      int style = Font.PLAIN;
+      String fontType = fontCommand.split(":")[1].toLowerCase();
+      switch (fontType) {
+        case "bold":
+          style = Font.BOLD;
+          break;
+        case "plain":
+          style = Font.PLAIN;
+          break;
+        case "italic":
+          style = Font.ITALIC;
+          break;
+        default:
+          throw new RuntimeException("Font type: " + fontType + " is not valid");
+      }
+      int size = Integer.parseInt(fontCommand.split(":")[0]);
+      font = sharedInstance.font.deriveFont(style, size);
+      sharedInstance.derivedFonts.put(fontCommand, font);
+    }
+    return font;
   }
 }

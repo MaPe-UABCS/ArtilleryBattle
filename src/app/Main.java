@@ -22,7 +22,7 @@ public class Main extends JFrame implements ActionListener {
 
     // frame config
     setLayout(new BorderLayout());
-    setSize(1600, 800);
+    setSize(800, 800);
     setLocationRelativeTo(null);
     setTitle("ArtilleryBattle");
     setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -32,21 +32,12 @@ public class Main extends JFrame implements ActionListener {
     anim.setBounds(0, 0, 800, 800);
     body.add(anim);
 
-    ArtilleryMap map2 = new ArtilleryMap(60);
-    map2.setBounds(800, 0, 800, 800);
-    body.add(map2);
-    map2.setMapActive(true);
-
     // set setVisible
     add(body);
     setVisible(true);
+    anim.setMapActive(true);
+    anim.setActionListener(this);
     anim.startAnimation();
-    map2.startAnimation();
-
-    map2.setCellStatus(0, 5, ArtilleryMap.CellStatuses.hit);
-    map2.setCellStatus(9, 0, ArtilleryMap.CellStatuses.blank);
-
-    map2.setActionListener(this);
   }
 
   @Override

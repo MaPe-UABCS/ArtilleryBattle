@@ -3,6 +3,14 @@
 
 # Ouput dir
 mkdir -p bin
+mkdir -p bin/img
+mkdir -p bin/sounds
+mkdir -p bin/fonts
+
+# including assets
+cp assets/img/* bin/img/
+cp assets/sounds/* bin/sounds
+cp assets/fonts/* bin/fonts
 
 # Jars
 mkdir -p src/lib

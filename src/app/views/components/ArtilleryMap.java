@@ -20,6 +20,8 @@ public class ArtilleryMap extends JPanel implements Runnable {
   Point cursorPosition;
   Point center;
   ArrayList<JLabel> layers;
+  JLabel coordinatesLabel;
+
   GraphicsDevice graphicsDevice;
 
   int screenWidth;
@@ -28,6 +30,8 @@ public class ArtilleryMap extends JPanel implements Runnable {
 
   Thread animationThread;
   boolean animationRuning;
+
+  public boolean isVisible;
 
   // AIM
   CursorAimLine horizontalAim;
@@ -50,6 +54,12 @@ public class ArtilleryMap extends JPanel implements Runnable {
     setLayout(null);
     setBackground(Color.black);
     buttonsWithActionListener = new ArrayList<AbstractButton>();
+
+    // coordinatres
+    coordinatesLabel = new JLabel();
+    coordinatesLabel.setForeground(Color.white);
+    coordinatesLabel.setFont(AssetManager.getFont("15:bold"));
+    add(coordinatesLabel);
 
     // pause screen
     pauseScreen = new JLabel("Waiting for Command autorization...");
@@ -177,8 +187,14 @@ public class ArtilleryMap extends JPanel implements Runnable {
         (int) getLocationOnScreen().getY() + getHeight() / 2);
 
     // Aim
-    horizontalAim.setPositionInAxis((int) (cursorPosition.getX() - center.getX() + getWidth() / 2));
-    verticalAim.setPositionInAxis((int) (cursorPosition.getY() - center.getY() + getHeight() / 2));
+    int actualCursorX = (int) (cursorPosition.getX() - center.getX() + getWidth() / 2);
+    int actualCursorY = (int) (cursorPosition.getY() - center.getY() + getHeight() / 2);
+
+    horizontalAim.setPositionInAxis(actualCursorX);
+    verticalAim.setPositionInAxis(actualCursorY);
+
+    coordinatesLabel.setBounds(actualCursorX + 10, actualCursorY, 200, 20);
+    coordinatesLabel.setText("[ " + cursorPosition.getX() + "," + cursorPosition.getY() + "]");
 
     // Layers parallax efect
     for (int i = 0; i < layers.size(); i++) {
@@ -227,7 +243,8 @@ public class ArtilleryMap extends JPanel implements Runnable {
 
     public void setAsBlank() {
       // TODO: llamar al asset manager y colocar algun tipo circulo o punto, blanco o gris
-      setBackground(Color.white);
+      setIcon(AssetManager.getImageIcon("blank.png"));
+      // setBackground(Color.white);
     }
 
     public void setAsHit() {
