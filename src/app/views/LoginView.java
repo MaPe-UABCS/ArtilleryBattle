@@ -103,7 +103,7 @@ public class LoginView extends View {
   }
 
   public String[] getFormData() {
-    return new String[] {userNameField.getText(), passwordField.getText()};
+    return new String[] {userNameField.getText(), passwordField.getPassword().toString()};
   }
 
   @Override

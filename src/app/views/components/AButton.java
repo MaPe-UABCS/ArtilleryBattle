@@ -36,7 +36,7 @@ public class AButton extends JButton {
       case lightSecondary:
         setBackground(Style.getColor(Style.foreground));
         setForeground(Style.getColor(Style.background));
-        setBorder(BorderFactory.createLineBorder(Style.getColor(Style.background)));
+        setBorder(BorderFactory.createLineBorder(Style.getColor(Style.gray)));
         break;
       case darkSecondary:
         setBackground(Style.getColor(Style.foreground));
