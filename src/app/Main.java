@@ -1,5 +1,6 @@
 package app;
 
+import app.views.AnimationThread;
 import app.views.LoginView;
 import app.views.MainMenuView;
 import app.views.View;
@@ -17,43 +18,53 @@ public class Main extends JFrame {
 
   private HashMap<String, View> programViews;
   private View currentView;
+  private AnimationThread animationThread;
 
   public Main() {
     if (sharedInstance == null) {
       sharedInstance = this;
     }
 
-    programViews = new HashMap<String, View>();
-    currentView = null;
     // singletons
     new SoundManager();
     new AssetManager();
-    // ----------------------
+    animationThread = new AnimationThread(60);
 
-    body = new JPanel();
-    body.setLayout(null);
-    body.setBackground(Style.getColor(Style.background));
-    body.setPreferredSize(new Dimension(600, 600));
+    // Jframe config
+    {
+      setLayout(new BorderLayout());
+      // setSize(600 + getInsets().left + getInsets().right, 600 + getInsets().top +
+      setLocationRelativeTo(null);
+      setResizable(false);
+      setTitle("ArtilleryBattle");
+      setDefaultCloseOperation(EXIT_ON_CLOSE);
+    }
 
-    // frame config
-    setLayout(new BorderLayout());
-    // setSize(600 + getInsets().left + getInsets().right, 600 + getInsets().top +
-    setLocationRelativeTo(null);
-    setResizable(false);
-    setTitle("ArtilleryBattle");
-    setDefaultCloseOperation(EXIT_ON_CLOSE);
-    // --------------
+    // Body container
+    {
+      body = new JPanel();
+      body.setLayout(null);
+      body.setBackground(Style.getColor(Style.background));
+      body.setPreferredSize(new Dimension(600, 600));
+    }
 
-    // TODO: check the prefs an see if the user has logged in before
-    programViews.put("Login", new LoginView());
-    programViews.put("MainMenu", new MainMenuView());
-    // --------------
+    // views
+    {
+      programViews = new HashMap<String, View>();
+      programViews.put("Login", new LoginView());
+      programViews.put("MainMenu", new MainMenuView());
+      currentView = null;
+    }
 
     // set setVisible
     add(body);
     this.pack();
     setVisible(true);
+    animationThread.start();
     // --------------
+
+    // TODO: check the prefs an see if the user has logged in before, if so load main Menu else
+    // login screen
     changeView("MainMenu");
   }
 

@@ -1,6 +1,8 @@
 package app.views.components;
 
 import app.AssetManager;
+import app.Style;
+import app.views.Animation;
 import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -14,28 +16,20 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class ArtilleryMap extends JPanel implements Runnable {
+public class ArtilleryMap extends JPanel {
 
-  int fps;
   Point cursorPosition;
   Point center;
   ArrayList<JLabel> layers;
   JLabel coordinatesLabel;
-
   GraphicsDevice graphicsDevice;
-
   int screenWidth;
   int screenHeight;
   int minScreenDimention;
-
-  Thread animationThread;
-  boolean animationRuning;
-
-  public boolean isVisible;
-
   // AIM
   CursorAimLine horizontalAim;
   CursorAimLine verticalAim;
+  Animation parallaxAnimation;
 
   // PauseScreen
   JPanel buttonsGrid;
@@ -45,20 +39,17 @@ public class ArtilleryMap extends JPanel implements Runnable {
 
   ArrayList<AbstractButton> buttonsWithActionListener;
 
-  public ArtilleryMap(int fps) {
-    // engine
-    this.fps = fps;
-    animationRuning = false;
+  public ArtilleryMap() {
 
     // swing things
     setLayout(null);
-    setBackground(Color.black);
+    setBackground(Style.getColor(Style.background));
     buttonsWithActionListener = new ArrayList<AbstractButton>();
 
     // coordinatres
     coordinatesLabel = new JLabel();
     coordinatesLabel.setForeground(Color.white);
-    coordinatesLabel.setFont(AssetManager.getFont("15:bold"));
+    coordinatesLabel.setFont(AssetManager.getFont("light:15:bold"));
     add(coordinatesLabel);
 
     // pause screen
@@ -83,7 +74,6 @@ public class ArtilleryMap extends JPanel implements Runnable {
     addLayer("MapL4.png");
     addLayer("MapL5.png");
     addLayer("MapL6.png");
-    animationThread = new Thread(this);
 
     // buttons
     buttonsMatrix = new GridButton[10][10];
@@ -102,6 +92,9 @@ public class ArtilleryMap extends JPanel implements Runnable {
     buttonsGrid.setBounds(0, 0, 800, 800);
     add(buttonsGrid);
 
+    // parallaxAnimation
+    parallaxAnimation = parallaxAnimation();
+
     // always at the end
     setMapActive(false);
   }
@@ -113,26 +106,51 @@ public class ArtilleryMap extends JPanel implements Runnable {
     this.add(layer);
   }
 
-  @Override
-  public void run() {
-    float delay = (1f / fps) * 1000;
-    if (center == null) {
-      center =
-          new Point(
-              (int) getLocationOnScreen().getX() + getWidth() / 2,
-              (int) getLocationOnScreen().getY() + getHeight() / 2);
-    }
+  private Animation parallaxAnimation() {
+    return new Animation() {
+      @Override
+      public void update() {
+        if (!this.isRunning()) return;
 
-    while (animationThread.isAlive()) {
-      try {
-        update();
-        Thread.sleep((long) delay);
-      } catch (Exception e) {
-        System.out.println(e.getMessage());
-        animationThread.interrupt();
-        return;
+        cursorPosition = MouseInfo.getPointerInfo().getLocation();
+        center.move(
+            (int) getLocationOnScreen().getX() + getWidth() / 2,
+            (int) getLocationOnScreen().getY() + getHeight() / 2);
+
+        // Aim
+        int actualCursorX = (int) (cursorPosition.getX() - center.getX() + getWidth() / 2);
+        int actualCursorY = (int) (cursorPosition.getY() - center.getY() + getHeight() / 2);
+
+        horizontalAim.setPositionInAxis(actualCursorX);
+        verticalAim.setPositionInAxis(actualCursorY);
+
+        coordinatesLabel.setBounds(actualCursorX + 10, actualCursorY, 200, 20);
+        coordinatesLabel.setText("[ " + cursorPosition.getX() + "," + cursorPosition.getY() + "]");
+
+        // Layers parallax efect
+        for (int i = 0; i < layers.size(); i++) {
+          // TODO: calcular una sola vez
+          double layerWeigth = (i) * 10;
+          double cursorXMin = center.getX() - minScreenDimention / 2;
+          double cursorXMax = center.getX() + minScreenDimention / 2;
+          // -----------------------------
+          double cursorX = clamp((cursorPosition.getX()), cursorXMin, cursorXMax);
+          double xWeigth = 2 * (cursorX - cursorXMin) / (cursorXMax - cursorXMin) - 1;
+          int x = (int) (0 + (layerWeigth * xWeigth));
+
+          // TODO: calcular una sola vez
+          double cursorYMin = center.getY() - minScreenDimention / 2;
+          double cursorYMax = center.getY() + minScreenDimention / 2;
+          // -----------------------------
+          double cursorY = clamp((cursorPosition.getY()), cursorYMin, cursorYMax);
+          double yWeigth = 2 * (cursorY - cursorYMin) / (cursorYMax - cursorYMin) - 1;
+          int y = (int) (0 + (layerWeigth * yWeigth));
+
+          JLabel layer = layers.get(i);
+          layer.setBounds(x, y, 800, 800);
+        }
       }
-    }
+    };
   }
 
   public enum CellStatuses {
@@ -150,73 +168,28 @@ public class ArtilleryMap extends JPanel implements Runnable {
     }
   }
 
-  public void startAnimation() {
+  public void setUpAnimation() {
     graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
     screenWidth = graphicsDevice.getDisplayMode().getWidth();
     screenHeight = graphicsDevice.getDisplayMode().getHeight();
     minScreenDimention = screenWidth > screenHeight ? screenHeight : screenWidth;
-    animationThread.start();
   }
 
   public void setMapActive(boolean active) {
-    animationRuning = active;
     if (active) {
+      parallaxAnimation().play();
       remove(pauseScreen);
       for (JLabel layer : layers) {
         add(layer);
       }
       add(buttonsGrid);
     } else {
+      parallaxAnimation().pause();
       remove(buttonsGrid);
       for (JLabel layer : layers) {
         remove(layer);
       }
       add(pauseScreen);
-    }
-  }
-
-  // call every frame
-  public void update() {
-    if (!animationRuning) return;
-    // TODO: Solo ejecuta el resto del metodo si es visible en pantalla, o si un try get screen
-    // location falla retornar
-
-    cursorPosition = MouseInfo.getPointerInfo().getLocation();
-    center.move(
-        (int) getLocationOnScreen().getX() + getWidth() / 2,
-        (int) getLocationOnScreen().getY() + getHeight() / 2);
-
-    // Aim
-    int actualCursorX = (int) (cursorPosition.getX() - center.getX() + getWidth() / 2);
-    int actualCursorY = (int) (cursorPosition.getY() - center.getY() + getHeight() / 2);
-
-    horizontalAim.setPositionInAxis(actualCursorX);
-    verticalAim.setPositionInAxis(actualCursorY);
-
-    coordinatesLabel.setBounds(actualCursorX + 10, actualCursorY, 200, 20);
-    coordinatesLabel.setText("[ " + cursorPosition.getX() + "," + cursorPosition.getY() + "]");
-
-    // Layers parallax efect
-    for (int i = 0; i < layers.size(); i++) {
-      // TODO: calcular una sola vez
-      double layerWeigth = (i) * 10;
-      double cursorXMin = center.getX() - minScreenDimention / 2;
-      double cursorXMax = center.getX() + minScreenDimention / 2;
-      // -----------------------------
-      double cursorX = clamp((cursorPosition.getX()), cursorXMin, cursorXMax);
-      double xWeigth = 2 * (cursorX - cursorXMin) / (cursorXMax - cursorXMin) - 1;
-      int x = (int) (0 + (layerWeigth * xWeigth));
-
-      // TODO: calcular una sola vez
-      double cursorYMin = center.getY() - minScreenDimention / 2;
-      double cursorYMax = center.getY() + minScreenDimention / 2;
-      // -----------------------------
-      double cursorY = clamp((cursorPosition.getY()), cursorYMin, cursorYMax);
-      double yWeigth = 2 * (cursorY - cursorYMin) / (cursorYMax - cursorYMin) - 1;
-      int y = (int) (0 + (layerWeigth * yWeigth));
-
-      JLabel layer = layers.get(i);
-      layer.setBounds(x, y, 800, 800);
     }
   }
 
