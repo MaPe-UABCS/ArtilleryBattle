@@ -13,9 +13,8 @@ cp assets/sounds/* bin/sounds
 cp assets/fonts/* bin/fonts
 
 # Jars
-mkdir -p src/lib
-jars="src/lib/$(ls -1 src/lib)"
-jars=$(echo $jars | sed 's/ /:lib\//g')
+mkdir -p bin/lib
+cp src/lib/*.jar bin/lib
 
 # Compile and run ヾ(⌐■_■)ノ♪
-javac -cp "src:${jars}" -d bin src/app/Main.java && java -cp "bin:${jars}" app.Main
+javac -cp "src:src/lib/*" -d bin src/app/Main.java && java -cp "bin:bin/lib/*" app.Main
