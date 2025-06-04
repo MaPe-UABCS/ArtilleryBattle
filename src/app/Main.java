@@ -6,11 +6,14 @@ import app.views.MainMenuView;
 import app.views.View;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 
-public class Main extends JFrame {
+public class Main extends JFrame implements ActionListener {
 
   private static Main sharedInstance;
 
@@ -29,6 +32,8 @@ public class Main extends JFrame {
     new SoundManager();
     new AssetManager();
     animationThread = new AnimationThread(60);
+
+    UIManager.put("Button.select", Style.getColor(Style.gray));
 
     // Jframe config
     {
@@ -65,7 +70,15 @@ public class Main extends JFrame {
 
     // TODO: check the prefs an see if the user has logged in before, if so load main Menu else
     // login screen
-    changeView("MainMenu");
+    changeView("Login");
+    currentView.setActionListener(this);
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e) {}
+
+  public static View getViewReference(String viewName) {
+    return sharedInstance.programViews.get(viewName);
   }
 
   public static void changeView(String viewName) {
