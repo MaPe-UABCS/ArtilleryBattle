@@ -4,14 +4,20 @@ import app.Main;
 import app.models.User;
 import app.views.LoginView;
 
-public class UserController {
+public class UserController extends Controller implements ActionListener{
 
+  LoginView loginView;
   public UserController() {
+    loginView = (LoginView) Main.getViewReference("Login");
+    loginView.setActionListener(this);
     super();
   }
 
+  actionPerformed(){
+
+  }
+
   public boolean registerUser() {
-    LoginView loginView = (LoginView) Main.getViewReference("Login");
     String formData[] = loginView.getFormData();
     String userName = formData[0];
     String password = formData[1];

@@ -14,7 +14,7 @@ cp assets/fonts/* bin/fonts
 
 # Jars
 mkdir -p src/lib
-jars="src/lib/$(/usr/bin/ls -1 src/lib)"
+jars="src/lib/$(ls -1 src/lib)"
 jars=$(echo $jars | sed 's/ /:lib\//g')
 
 # Compile and run ヾ(⌐■_■)ノ♪

@@ -4,6 +4,7 @@ import app.views.AnimationThread;
 import app.views.LoginView;
 import app.views.MainMenuView;
 import app.views.View;
+import app.controllers.Controller;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -19,7 +20,8 @@ public class Main extends JFrame implements ActionListener {
 
   private JPanel body;
 
-  private HashMap<String, View> programViews;
+  private HashMap<String, Controller> controllers;
+  private HashMap<String, View> views;
   private View currentView;
   private AnimationThread animationThread;
 
@@ -55,10 +57,16 @@ public class Main extends JFrame implements ActionListener {
 
     // views
     {
-      programViews = new HashMap<String, View>();
-      programViews.put("Login", new LoginView());
-      programViews.put("MainMenu", new MainMenuView());
+      views = new HashMap<String, View>();
+      views.put("Login", new LoginView());
+      views.put("MainMenu", new MainMenuView());
       currentView = null;
+    }
+
+    //Contorllers
+    {
+      controllers = new HashMap<String,Controller>();
+      controllers.put("User", new Controller());
     }
 
     // set setVisible
@@ -70,22 +78,24 @@ public class Main extends JFrame implements ActionListener {
 
     // TODO: check the prefs an see if the user has logged in before, if so load main Menu else
     // login screen
-    changeView("Login");
+    changeView("MainMenu");
     currentView.setActionListener(this);
   }
 
   @Override
-  public void actionPerformed(ActionEvent e) {}
+  public void actionPerformed(ActionEvent e) {
+    System.out.println("Buton pressed");
+  }
 
   public static View getViewReference(String viewName) {
-    return sharedInstance.programViews.get(viewName);
+    return sharedInstance.views.get(viewName);
   }
 
   public static void changeView(String viewName) {
     if (sharedInstance.currentView != null) {
       sharedInstance.body.remove(sharedInstance.currentView);
     }
-    sharedInstance.currentView = sharedInstance.programViews.get(viewName);
+    sharedInstance.currentView = sharedInstance.views.get(viewName);
     if (sharedInstance.currentView == null) {
       throw new RuntimeException(viewName + " does not exists");
     }
