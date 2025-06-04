@@ -5,16 +5,17 @@ import app.views.LoginView;
 import app.views.MainMenuView;
 import app.views.View;
 import app.controllers.Controller;
+import app.controllers.UserController;
+
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-public class Main extends JFrame implements ActionListener {
+public class Main extends JFrame {
 
   private static Main sharedInstance;
 
@@ -63,10 +64,10 @@ public class Main extends JFrame implements ActionListener {
       currentView = null;
     }
 
-    //Contorllers
+    // Contorllers
     {
-      controllers = new HashMap<String,Controller>();
-      controllers.put("User", new Controller());
+      controllers = new HashMap<String, Controller>();
+      controllers.put("User", new UserController());
     }
 
     // set setVisible
@@ -76,15 +77,10 @@ public class Main extends JFrame implements ActionListener {
     animationThread.start();
     // --------------
 
-    // TODO: check the prefs an see if the user has logged in before, if so load main Menu else
+    // TODO: check the prefs an see if the user has logged in before, if so load
+    // main Menu else
     // login screen
-    changeView("MainMenu");
-    currentView.setActionListener(this);
-  }
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    System.out.println("Buton pressed");
+    changeView("Login");
   }
 
   public static View getViewReference(String viewName) {

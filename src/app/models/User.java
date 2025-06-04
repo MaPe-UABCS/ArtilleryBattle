@@ -2,6 +2,11 @@ package app.models;
 
 import java.util.ArrayList;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 public class User {
   private int id;
   private String name;
@@ -14,6 +19,7 @@ public class User {
   }
 
   public User(String name, String passwordHash) {
+    this.id = -1;
     this.name = name;
     this.passwordHash = passwordHash;
   }
@@ -24,11 +30,21 @@ public class User {
   }
 
   public boolean save() {
-    // si este usuario tiene id significa que ya existia de ante mano en la base de datos y ha sido
-    // modificado, efectuar un updaat, de lo contrario insert y consulta el ID asignado en la base
-    // de datos
-    // TODO: al terminar de ejecutar el query establecer el id de esta instancia en caso de que se
-    // pueda guardar
+    if (id == -1) {
+      // insert
+      String query = "insert into users(name,password) values (?,?)";
+      int created = 0;
+      try (Connection con = MySQLConnection.connect();
+          PreparedStatement pst = con.prepareStatement(query);) {
+        pst.setString(1, getName());
+        pst.setString(2, getPasswordHash());
+        created = pst.executeUpdate();
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+        e.printStackTrace();
+      }
+      return created > 0;
+    }
     return false;
   }
 
@@ -36,7 +52,26 @@ public class User {
     return null;
   }
 
-  public static User find(String name) {
+  public static User find(String nameQuery) {
+    try (
+        Connection con = MySQLConnection.connect();
+        Statement st = (Statement) con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);) {
+
+      String query = "select * from users where name = \"" + nameQuery + "\"";
+      ResultSet rs = st.executeQuery(query);
+
+      while (rs.next()) {
+        int idDB = rs.getInt("id");
+        String name = rs.getString("name");
+        String passwordHash = rs.getString("password");
+        return new User(idDB, name, passwordHash);
+      }
+
+      return null;
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+
     return null;
   }
 
