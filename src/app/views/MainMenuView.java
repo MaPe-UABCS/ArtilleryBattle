@@ -109,10 +109,19 @@ public class MainMenuView extends View {
     AnimationThread.registerAnimation(this.parallaxAnimation);
   }
 
+  public void setLoggedTag(String userName) {
+    userSessionLabel.setText("Playing as " + userName);
+  }
+
   @Override
   public void before() {
     setUpAnimation();
     parallaxAnimation.play();
+  }
+
+  @Override
+  public void after() {
+    parallaxAnimation.pause();  
   }
 
   public void setUpAnimation() {
@@ -134,12 +143,13 @@ public class MainMenuView extends View {
       @Override
       public void update() {
         if (!this.isRunning()) return;
+
         try {
           center.move(
               (int) getLocationOnScreen().getX() + getWidth() / 2,
               (int) getLocationOnScreen().getY() + getHeight() / 2);
         } catch (Exception e) {
-          System.out.println("wtf");
+          System.out.println("a");
           return;
         }
 

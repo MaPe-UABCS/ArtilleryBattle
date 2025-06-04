@@ -25,6 +25,7 @@ public abstract class View extends JPanel {
    * start
    */
   public abstract void before();
+  public abstract void after();
 
   public void registerButton(AbstractButton button) {
     button.setActionCommand(viewName + ":" + button.getActionCommand());

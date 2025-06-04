@@ -32,7 +32,7 @@ public class User {
   public boolean save() {
     if (id == -1) {
       // insert
-      String query = "insert into users(name,password) values (?,?)";
+      String query = "insert into users(name,password_hash) values (?,?)";
       int created = 0;
       try (Connection con = MySQLConnection.connect();
           PreparedStatement pst = con.prepareStatement(query);) {
@@ -63,10 +63,9 @@ public class User {
       while (rs.next()) {
         int idDB = rs.getInt("id");
         String name = rs.getString("name");
-        String passwordHash = rs.getString("password");
+        String passwordHash = rs.getString("password_hash");
         return new User(idDB, name, passwordHash);
       }
-
       return null;
     } catch (Exception e) {
       System.out.println(e.getMessage());

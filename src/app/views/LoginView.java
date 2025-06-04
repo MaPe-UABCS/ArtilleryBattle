@@ -96,7 +96,14 @@ public class LoginView extends View {
   }
 
   public void before() {
-    System.out.println("Login biew beofre executing");
+    resetForm();
+    revalidate();
+    repaint();
+  }
+
+  @Override
+  public void after() {
+      
   }
 
   public void resetForm() {
@@ -105,7 +112,11 @@ public class LoginView extends View {
   }
 
   public String[] getFormData() {
-    return new String[] {userNameField.getText(), passwordField.getPassword().toString()};
+    String password = "";
+    for (char c : passwordField.getPassword()) {
+      password += c;
+    }
+    return new String[] {userNameField.getText(), password};
   }
 
   @Override

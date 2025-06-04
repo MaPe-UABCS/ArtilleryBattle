@@ -1,15 +1,16 @@
 package app;
 
+import app.controllers.Controller;
+import app.controllers.UserController;
+import app.models.MySQLConnection;
+import app.models.User;
 import app.views.AnimationThread;
 import app.views.LoginView;
 import app.views.MainMenuView;
 import app.views.View;
-import app.controllers.Controller;
-import app.controllers.UserController;
-
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -24,12 +25,24 @@ public class Main extends JFrame {
   private HashMap<String, Controller> controllers;
   private HashMap<String, View> views;
   private View currentView;
+  private User currentUser;
+
+  public static User getCurrentUser() {
+    return sharedInstance.currentUser;
+  }
+
+  public static void setCurrentUser(User currentUser) {
+    sharedInstance.currentUser = currentUser;
+  }
+
   private AnimationThread animationThread;
 
   public Main() {
     if (sharedInstance == null) {
       sharedInstance = this;
     }
+
+    MySQLConnection.connect();
 
     // singletons
     new SoundManager();
@@ -87,9 +100,18 @@ public class Main extends JFrame {
     return sharedInstance.views.get(viewName);
   }
 
+  public static View getCurrentView() {
+    return sharedInstance.currentView;
+  }
+
+  public static void addActionListener2View(String viewName, ActionListener listener) {
+    getViewReference(viewName).setActionListener(listener);
+  }
+
   public static void changeView(String viewName) {
     if (sharedInstance.currentView != null) {
       sharedInstance.body.remove(sharedInstance.currentView);
+      sharedInstance.currentView.after();
     }
     sharedInstance.currentView = sharedInstance.views.get(viewName);
     if (sharedInstance.currentView == null) {
