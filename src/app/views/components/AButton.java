@@ -20,6 +20,17 @@ public class AButton extends JButton {
     applyStyle(style);
   }
 
+  public AButton(int style) {
+    applyStyle(style);
+  }
+
+  public AButton(String text, String fontCommand, int style) {
+    setText(text);
+    setFont(AssetManager.getFont(fontCommand));
+
+    applyStyle(style);
+  }
+
   private void applyStyle(int style) {
     setFocusPainted(false);
 

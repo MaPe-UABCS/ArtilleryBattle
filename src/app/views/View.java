@@ -26,10 +26,22 @@ public abstract class View extends JPanel {
    */
   public abstract void before();
 
+  public void registerButton(AbstractButton button) {
+    button.setActionCommand(viewName + ":" + button.getActionCommand());
+    buttons.add(button);
+  }
+
+  public void registerButton(AbstractButton button, String command) {
+    button.setActionCommand(viewName + ":" + command);
+    buttons.add(button);
+  }
+
   @Override
   public Component add(Component component) {
     if (component.getClass() == AbstractButton.class) {
-      buttons.add((AbstractButton) component);
+      AbstractButton button = (AbstractButton) component;
+      button.setActionCommand(viewName + ":command");
+      buttons.add(button);
     }
     return super.add(component);
   }

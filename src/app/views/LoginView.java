@@ -73,11 +73,13 @@ public class LoginView extends View {
         formGBC.gridx = 0;
         AButton skipButton = new AButton("Skip", 20, AButton.lightSecondary);
         skipButton.setPreferredSize(new Dimension(112, 30));
+        registerButton(skipButton);
         form.add(skipButton, formGBC);
 
         formGBC.gridx = 1;
         AButton loginButton = new AButton("Continue", 24, AButton.darkPrimary);
         loginButton.setPreferredSize(new Dimension(200, 30));
+        registerButton(loginButton);
         form.add(loginButton, formGBC);
       }
 
