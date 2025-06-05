@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -29,13 +30,14 @@ public class GameView extends View {
   // drag&drop
   JPanel indicatorsLayer;
   ArrayList<JLabel> leftBoatsIndicators, rigthBoatsIndicators;
-  JPanel boatsContainer;
+  JPanel leftBoatSelectionContainer;
+  JPanel rightBoatSelectionContainer;
   JLabel selectedBoat;
   int selectedBoatSize;
   Animation dragAndDropAnimation;
   Point viewPositionOnScren;
 
-  ArtilleryMap leftMap, rightMap;
+  private ArtilleryMap leftMap, rightMap;
 
   public GameView() {
     super("Game");
@@ -77,58 +79,80 @@ public class GameView extends View {
     // TODO: also for right
 
     // Boats selection
-    boatsContainer = new JPanel(null);
-    {
-      JButton boat5Button = new AnIconButton("Boat5H");
-      boat5Button.setBounds(0, 0, 43 * 5, 43);
-      this.buttons.add(boat5Button);
-      boatsContainer.add(boat5Button);
+    leftBoatSelectionContainer = new JPanel(null);
+    leftBoatSelectionContainer.setBounds(130, 10, 440, 43 * 2);
+    leftBoatSelectionContainer.setBorder(
+        BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
 
-      JButton boat3Button1 = new AnIconButton("Boat3H");
-      boat3Button1.setBounds(43 * 5, 0, 43 * 3, 43);
-      this.buttons.add(boat3Button1);
-      boatsContainer.add(boat3Button1);
+    leftBoatSelectionContainer.setOpaque(false);
+    generateBoatSelectionButtons(leftBoatSelectionContainer, "L");
+    add(leftBoatSelectionContainer);
 
-      JButton boat2Button = new AnIconButton("Boat2H");
-      boat2Button.setBounds(43 * 8, 43, 43 * 2, 43);
-      this.buttons.add(boat2Button);
-      boatsContainer.add(boat2Button);
-
-      JButton boat4Button = new AnIconButton("Boat4H");
-      boat4Button.setBounds(0, 43, 43 * 4, 43);
-      this.buttons.add(boat4Button);
-      boatsContainer.add(boat4Button);
-
-      JButton boat3Button2 = new AnIconButton("Boat3H");
-      boat3Button2.setBounds(43 * 5, 43, 43 * 3, 43);
-      this.buttons.add(boat3Button2);
-      boatsContainer.add(boat3Button2);
-
-      AButton boatsReadyButton = new AButton("Ready", 20, AButton.lightPrimary);
-      boatsReadyButton.setBounds(43 * 8, 0, 43 * 2, 43);
-      this.buttons.add(boatsReadyButton);
-      boatsContainer.add(boatsReadyButton);
-    }
-    boatsContainer.setBounds(130, 30, 430, 43 * 2);
-    boatsContainer.setOpaque(false);
-    add(boatsContainer);
-
+    rightBoatSelectionContainer = new JPanel(null);
+    rightBoatSelectionContainer.setBorder(
+        BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
+    rightBoatSelectionContainer.setBounds(700, 10, 440, 43 * 2);
+    rightBoatSelectionContainer.setOpaque(false);
+    generateBoatSelectionButtons(rightBoatSelectionContainer, "R");
+    add(rightBoatSelectionContainer);
     // Map
     {
       leftMap = new ArtilleryMap(this);
       leftMap.setBounds(129, 130, 440, 440);
-      // leftMap.setActionListener(this);
+      leftMap.setSide("L");
       for (AbstractButton mapButtons : leftMap.getButtonsReference()) {
         this.buttons.add(mapButtons);
       }
       add(leftMap);
 
-      // rightMap = new ArtilleryMap();
-      // rightMap.setBounds(500, 130, 430, 430);
-      // add(rightMap);
+      rightMap = new ArtilleryMap(this);
+      rightMap.setSide("R");
+      rightMap.setBounds(700, 130, 440, 430);
+      for (AbstractButton mapButtons : rightMap.getButtonsReference()) {
+        this.buttons.add(mapButtons);
+      }
+      add(rightMap);
     }
     // TODO: do the same with rigth map
 
+  }
+
+  private void generateBoatSelectionButtons(JPanel container, String side) {
+    JButton boat5Button = new AnIconButton("Boat5H");
+    boat5Button.setActionCommand(side + ":Boat5H");
+    boat5Button.setBounds(0, 0, 43 * 5, 43);
+    this.buttons.add(boat5Button);
+    container.add(boat5Button);
+
+    JButton boat3Button1 = new AnIconButton("Boat3H");
+    boat3Button1.setActionCommand(side + ":Boat3H");
+    boat3Button1.setBounds(43 * 5, 0, 43 * 3, 43);
+    this.buttons.add(boat3Button1);
+    container.add(boat3Button1);
+
+    JButton boat2Button = new AnIconButton("Boat2H");
+    boat2Button.setActionCommand(side + ":Boat2H");
+    boat2Button.setBounds(43 * 8, 43, 43 * 2, 43);
+    this.buttons.add(boat2Button);
+    container.add(boat2Button);
+
+    JButton boat4Button = new AnIconButton("Boat4H");
+    boat4Button.setActionCommand(side + ":Boat4H");
+    boat4Button.setBounds(0, 43, 43 * 4, 43);
+    this.buttons.add(boat4Button);
+    container.add(boat4Button);
+
+    JButton boat3Button2 = new AnIconButton("Boat3H");
+    boat3Button2.setActionCommand(side + ":Boat3H");
+    boat3Button2.setBounds(43 * 5, 43, 43 * 3, 43);
+    this.buttons.add(boat3Button2);
+    container.add(boat3Button2);
+
+    AButton boatsReadyButton = new AButton("Ready", 20, AButton.lightPrimary);
+    boatsReadyButton.setActionCommand(side + ":Ready");
+    boatsReadyButton.setBounds(43 * 8, 0, 43 * 2 + 10, 43);
+    this.buttons.add(boatsReadyButton);
+    container.add(boatsReadyButton);
   }
 
   public void addMove2HistoryDisplay(String move) {
@@ -148,14 +172,20 @@ public class GameView extends View {
     leftMap.setUpAnimation();
     leftMap.setMapActive(true);
 
-    // rightMap.setUpAnimation();
-    // rightMap.setMapActive(true);
+    this.rigthBoatsIndicators = new ArrayList<JLabel>();
+    rightMap.setUpAnimation();
+    rightMap.setMapActive(false);
   }
 
   @Override
   public void after() {
     leftMap.setMapActive(false);
     rightMap.setMapActive(false);
+  }
+
+  public void setMapActive(String side, boolean status) {
+    ArtilleryMap map = side.equals("L") ? leftMap : rightMap;
+    map.setMapActive(status);
   }
 
   public void setSelectedBoat(String boatName) {
@@ -171,22 +201,23 @@ public class GameView extends View {
     dragAndDropAnimation.pause();
   }
 
-  public void placeSelectedBoatInMap(Point gridButtonLocation) {
-    // JButton targetButton = (JButton) e.getSource();
-    // targetButton.getLocation();
+  public void placeSelectedBoatInMap(Point gridButtonLocation, boolean left) {
 
-    // Preguntar al artilleryBattle si es legal la ubicaion
+    ArtilleryMap map = left ? leftMap : rightMap;
 
-    // TODO: crea un array list de JLaels que guardan los botes left y otro para rigth
-    // ademas de 2 metodos para ocultarl left y rigth
     Icon indicatorIcon = selectedBoat.getIcon();
     JLabel boatIndicator = new JLabel(indicatorIcon);
 
-    int indicatorX = leftMap.getX() + (int) gridButtonLocation.getX();
-    int indicatorY = leftMap.getY() + (int) gridButtonLocation.getY();
+    int indicatorX = map.getX() + (int) gridButtonLocation.getX();
+    int indicatorY = map.getY() + (int) gridButtonLocation.getY();
 
     boatIndicator.setBounds(indicatorX, indicatorY, indicatorIcon.getIconWidth(), 43);
     indicatorsLayer.add(boatIndicator);
+    if (left) {
+      leftBoatsIndicators.add(boatIndicator);
+    } else {
+      rigthBoatsIndicators.add(boatIndicator);
+    }
 
     dragAndDropAnimation.pause();
     selectedBoat.setIcon(null);
@@ -196,16 +227,37 @@ public class GameView extends View {
     ArrayList<JLabel> boatsIndicator = left ? leftBoatsIndicators : rigthBoatsIndicators;
 
     for (JLabel boatIndicator : boatsIndicator) {
-      boatsIndicator.remove(boatIndicator);
+      indicatorsLayer.remove(boatIndicator);
     }
   }
 
-  public void hideBoatSelectionButton(JButton button) {
-    boatsContainer.remove(button);
+  public void showBoats(boolean left) {
+    ArrayList<JLabel> boatsIndicator = left ? leftBoatsIndicators : rigthBoatsIndicators;
+
+    for (JLabel boatIndicator : boatsIndicator) {
+      indicatorsLayer.add(boatIndicator);
+    }
   }
 
-  public void showBoatSelectionButton(JButton button) {
-    boatsContainer.add(button);
+  public void hideBoatSelectionButton(JButton button, String side) {
+    if (side.equals("L")) {
+      leftBoatSelectionContainer.remove(button);
+    } else {
+      rightBoatSelectionContainer.remove(button);
+    }
+  }
+
+  public void showBoatSelectionButton(JButton button, String side) {
+    if (side.equals("L")) {
+      leftBoatSelectionContainer.add(button);
+    } else {
+      rightBoatSelectionContainer.add(button);
+    }
+  }
+
+  public void hideBoatSelectionContainer(String side) {
+    JPanel container = side.equals("L") ? leftBoatSelectionContainer : rightBoatSelectionContainer;
+    remove(container);
   }
 
   private Animation boatsCursorFollowingAnimation() {

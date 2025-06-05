@@ -97,7 +97,9 @@ public class Main extends JFrame {
     // TODO: check the prefs an see if the user has logged in before, if so load
     // main Menu else
     // login screen
-    changeView("Game");
+    changeView("MainMenu");
+    // TODO: eliminar esto aes para debugg
+    currentUser = User.find("manu");
   }
 
   public static View getViewReference(String viewName) {

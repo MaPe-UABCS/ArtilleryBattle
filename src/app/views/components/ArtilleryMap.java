@@ -14,6 +14,7 @@ import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -61,7 +62,8 @@ public class ArtilleryMap extends JPanel {
     // pause screen
     pauseScreen = new JLabel("Waiting for Command autorization...");
     pauseScreen.setOpaque(true);
-    pauseScreen.setBounds(0, 0, size, size);
+    pauseScreen.setBorder(BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
+    pauseScreen.setBounds(0, 0, size-10, size-10);
     pauseScreen.setBackground(Color.black);
     pauseScreen.setForeground(Color.green);
 
@@ -120,9 +122,15 @@ public class ArtilleryMap extends JPanel {
         if (!this.isRunning()) return;
 
         cursorPosition = MouseInfo.getPointerInfo().getLocation();
-        center.move(
-            (int) getLocationOnScreen().getX() + getWidth() / 2,
-            (int) getLocationOnScreen().getY() + getHeight() / 2);
+
+        try {
+          center.move(
+              (int) getLocationOnScreen().getX() + getWidth() / 2,
+              (int) getLocationOnScreen().getY() + getHeight() / 2);
+        } catch (Exception e) {
+          System.out.println("e");
+          return;
+        }
 
         // Aim
         int actualCursorX = (int) (cursorPosition.getX() - center.getX() + getWidth() / 2);
@@ -167,8 +175,6 @@ public class ArtilleryMap extends JPanel {
   }
 
   public void setCellStatus(int column, int row, CellStatuses status) {
-    // TODO: aparecer un flash de blanco y rojo animacion disparo parpadeo, independientemente del
-    // resultado, sonido asi de click disparo explocion bit moderno aestetic
     if (status == CellStatuses.hit) {
       buttonsMatrix[column][row].setAsHit();
     } else if (status == CellStatuses.blank) {
@@ -193,12 +199,16 @@ public class ArtilleryMap extends JPanel {
       }
       add(buttonsGrid);
     } else {
+      // System.out.println("waigin ");
       parallaxAnimation.pause();
       remove(buttonsGrid);
       for (JLabel layer : layers) {
         remove(layer);
       }
       add(pauseScreen);
+      // System.out.println("pause");
+      revalidate();
+      repaint();
     }
   }
 
@@ -224,14 +234,11 @@ public class ArtilleryMap extends JPanel {
     }
 
     public void setAsBlank() {
-      // TODO: llamar al asset manager y colocar algun tipo circulo o punto, blanco o gris
       setIcon(AssetManager.getImageIcon("blank.png"));
-      // setBackground(Color.white);
     }
 
     public void setAsHit() {
-      // TODO: llamar al asset manager y colocar un icono de hit una cruz o algo de color rojo
-      setBackground(Color.red);
+      setIcon(AssetManager.getImageIcon("hit.png"));
     }
   }
 
@@ -262,6 +269,12 @@ public class ArtilleryMap extends JPanel {
 
   public ArrayList<AbstractButton> getButtonsReference() {
     return buttonsWithActionListener;
+  }
+
+  public void setSide(String side) {
+    for (AbstractButton button : buttonsWithActionListener) {
+      button.setActionCommand(side + ":" + button.getActionCommand());
+    }
   }
 
   public void setActionListener(ActionListener listener) {
