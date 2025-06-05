@@ -3,6 +3,7 @@ package app.views.components;
 import app.AssetManager;
 import app.Style;
 import app.views.Animation;
+import app.views.AnimationThread;
 import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -39,6 +40,8 @@ public class ArtilleryMap extends JPanel {
 
   ArrayList<AbstractButton> buttonsWithActionListener;
 
+  private int size = 440;
+
   public ArtilleryMap() {
 
     // swing things
@@ -49,13 +52,13 @@ public class ArtilleryMap extends JPanel {
     // coordinatres
     coordinatesLabel = new JLabel();
     coordinatesLabel.setForeground(Color.white);
-    coordinatesLabel.setFont(AssetManager.getFont("light:15:bold"));
+    coordinatesLabel.setFont(AssetManager.getFont("light:10:plain"));
     add(coordinatesLabel);
 
     // pause screen
     pauseScreen = new JLabel("Waiting for Command autorization...");
     pauseScreen.setOpaque(true);
-    pauseScreen.setBounds(0, 0, 800, 800);
+    pauseScreen.setBounds(0, 0, size, size);
     pauseScreen.setBackground(Color.black);
     pauseScreen.setForeground(Color.green);
 
@@ -89,11 +92,12 @@ public class ArtilleryMap extends JPanel {
         buttonsWithActionListener.add(gridButton);
       }
     }
-    buttonsGrid.setBounds(0, 0, 800, 800);
+    buttonsGrid.setBounds(0, 0, size, size);
     add(buttonsGrid);
 
     // parallaxAnimation
     parallaxAnimation = parallaxAnimation();
+    AnimationThread.registerAnimation(parallaxAnimation);
 
     // always at the end
     setMapActive(false);
@@ -101,7 +105,7 @@ public class ArtilleryMap extends JPanel {
 
   private void addLayer(String imageName) {
     JLabel layer = new JLabel(AssetManager.getImageIcon(imageName));
-    layer.setBounds(0, 0, 800, 800);
+    layer.setBounds(0, 0, size, size);
     layers.add(layer);
     this.add(layer);
   }
@@ -147,7 +151,7 @@ public class ArtilleryMap extends JPanel {
           int y = (int) (0 + (layerWeigth * yWeigth));
 
           JLabel layer = layers.get(i);
-          layer.setBounds(x, y, 800, 800);
+          layer.setBounds(x, y, size, size);
         }
       }
     };
@@ -173,18 +177,19 @@ public class ArtilleryMap extends JPanel {
     screenWidth = graphicsDevice.getDisplayMode().getWidth();
     screenHeight = graphicsDevice.getDisplayMode().getHeight();
     minScreenDimention = screenWidth > screenHeight ? screenHeight : screenWidth;
+    center = new Point();
   }
 
   public void setMapActive(boolean active) {
     if (active) {
-      parallaxAnimation().play();
+      parallaxAnimation.play();
       remove(pauseScreen);
       for (JLabel layer : layers) {
         add(layer);
       }
       add(buttonsGrid);
     } else {
-      parallaxAnimation().pause();
+      parallaxAnimation.pause();
       remove(buttonsGrid);
       for (JLabel layer : layers) {
         remove(layer);
@@ -244,9 +249,9 @@ public class ArtilleryMap extends JPanel {
 
     public void setPositionInAxis(int positionInAxis) {
       if (this.axis == AimAxis.horizontal) {
-        this.setBounds(positionInAxis, 0, CursorAimLine.stroke, 800);
+        this.setBounds(positionInAxis, 0, CursorAimLine.stroke, size);
       } else {
-        this.setBounds(0, positionInAxis, 800, CursorAimLine.stroke);
+        this.setBounds(0, positionInAxis, size, CursorAimLine.stroke);
       }
     }
   }

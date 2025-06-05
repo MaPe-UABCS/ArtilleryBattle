@@ -15,7 +15,8 @@ public class Style {
   private static Map<Integer, Color> Colors =
       Map.of(
           background,
-          Color.decode("#060606"),
+          // Color.decode("#060606"),
+          Color.decode("#000000"),
           foreground,
           Color.decode("#e9e9e9"),
           primary,

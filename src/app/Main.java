@@ -5,6 +5,7 @@ import app.controllers.UserController;
 import app.models.MySQLConnection;
 import app.models.User;
 import app.views.AnimationThread;
+import app.views.GameView;
 import app.views.LoginView;
 import app.views.MainMenuView;
 import app.views.View;
@@ -74,6 +75,7 @@ public class Main extends JFrame {
       views = new HashMap<String, View>();
       views.put("Login", new LoginView());
       views.put("MainMenu", new MainMenuView());
+      views.put("Game", new GameView());
       currentView = null;
     }
 
@@ -93,7 +95,7 @@ public class Main extends JFrame {
     // TODO: check the prefs an see if the user has logged in before, if so load
     // main Menu else
     // login screen
-    changeView("Login");
+    changeView("Game");
   }
 
   public static View getViewReference(String viewName) {
@@ -117,6 +119,17 @@ public class Main extends JFrame {
     if (sharedInstance.currentView == null) {
       throw new RuntimeException(viewName + " does not exists");
     }
+
+    if (viewName == "Game") {
+      sharedInstance.setSize(1300, 600);
+      sharedInstance.body.setPreferredSize(new Dimension(1300, 600));
+      sharedInstance.body.setBounds(0, 0, 1300, 600);
+    } else {
+      sharedInstance.setSize(600, 600);
+      sharedInstance.body.setPreferredSize(new Dimension(600, 600));
+      // sharedInstance.body.setBounds(0, 0, 600, 600);
+    }
+
     sharedInstance.body.add(sharedInstance.currentView);
     sharedInstance.currentView.before();
   }
