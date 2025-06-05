@@ -5,11 +5,10 @@ import app.models.User;
 import app.views.LoginView;
 import app.views.MainMenuView;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
 import org.mindrot.jbcrypt.*;
 
-public class UserController extends Controller implements ActionListener {
+public class UserController extends Controller {
 
   LoginView loginView;
   private boolean userAutenticated;

@@ -1,6 +1,5 @@
 package app.controllers;
 
-public class Controller {
-  public Controller() {
-  }
-}
+import java.awt.event.ActionListener;
+
+public abstract class Controller implements ActionListener {}

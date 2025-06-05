@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 public abstract class View extends JPanel {
 
   public final String viewName;
-  private final ArrayList<AbstractButton> buttons;
+  protected final ArrayList<AbstractButton> buttons;
 
   public View(String name) {
     setBackground(Style.getColor(Style.background));

@@ -5,6 +5,7 @@ import app.Style;
 import app.views.Animation;
 import app.views.AnimationThread;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
@@ -42,8 +43,10 @@ public class ArtilleryMap extends JPanel {
 
   private int size = 440;
 
-  public ArtilleryMap() {
+  Component parentComponent;
 
+  public ArtilleryMap(Component parent) {
+    parentComponent = parent;
     // swing things
     setLayout(null);
     setBackground(Style.getColor(Style.background));
@@ -153,6 +156,7 @@ public class ArtilleryMap extends JPanel {
           JLabel layer = layers.get(i);
           layer.setBounds(x, y, size, size);
         }
+        parentComponent.repaint();
       }
     };
   }
