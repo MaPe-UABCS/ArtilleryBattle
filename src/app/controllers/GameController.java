@@ -3,7 +3,6 @@ package app.controllers;
 import app.Main;
 import app.views.GameView;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import javax.swing.JButton;
 
 public class GameController extends Controller {
@@ -19,10 +18,11 @@ public class GameController extends Controller {
   // left
   boolean leftMapboatsReady;
   int leftMapAliveBoatsCells;
-  ArrayList<GameBoat> leftMapBoats;
+  // Both
   JButton lastJButtonSelectionBoat;
-
   // right
+  boolean rightMapboatsReady;
+  int rightMapAliveBoatsCells;
 
   public GameController() {
     gameView = (GameView) Main.getViewReference("Game");
@@ -34,7 +34,10 @@ public class GameController extends Controller {
   }
 
   public void startNewGame() {
-    leftMapBoats = new ArrayList<GameBoat>();
+    leftMapAliveBoatsCells = 0;
+    leftMapboatsReady = false;
+    rightMapboatsReady = false;
+    rightMapAliveBoatsCells = 0;
 
     for (int x = 0; x < 10; x++) {
       for (int y = 0; y < 10; y++) {
@@ -51,33 +54,47 @@ public class GameController extends Controller {
 
     String command = e.getActionCommand();
 
-    if (!placingBoat && command.charAt(0) == 'B') {
-      selectedBoatSize = Integer.parseInt(command.charAt(4) + "");
-      gameView.setSelectedBoat(command);
-      placingBoat = true;
-      lastJButtonSelectionBoat = (JButton) e.getSource();
-      gameView.hideBoatSelectionButton(lastJButtonSelectionBoat);
-      // hide the boat button
-    } else if (placingBoat && command.charAt(0) == 'm') {
-      placingBoat = false;
-
-      JButton gridButton = (JButton) e.getSource();
-      // calculate the logical coordinates of the boat
-      int mapX = (int) gridButton.getLocation().getX() / gridButton.getWidth();
-      int mapY = (int) gridButton.getLocation().getY() / gridButton.getHeight();
-      boolean legal = placeBoatInMap(mapX, mapY, selectedBoatSize);
-
-      selectedBoatSize = -99;
-
-      if (legal) {
-        // ok
-        gameView.placeSelectedBoatInMap(gridButton.getLocation());
-      } else {
-        // undo the hide boat button
-        gameView.showBoatSelectionButton(lastJButtonSelectionBoat);
-        lastJButtonSelectionBoat = null;
+    if (leftMapboatsReady == false || rightMapboatsReady == false) {
+      if (command == "Ready") {
+        if (leftMapboatsReady == false) {
+          leftMapboatsReady = leftMapAliveBoatsCells == 17;
+        } else if (rightMapboatsReady == false) {
+          rightMapboatsReady = rightMapAliveBoatsCells == 17;
+        }
       }
-      gameView.unselectBoat();;
+
+      // TODO:  si el x del gridButton, o boatSelectionButton es mayor a la mitad del la vista
+      // entonces es de la derecha
+
+      if (!placingBoat && command.charAt(0) == 'B') {
+        selectedBoatSize = Integer.parseInt(command.charAt(4) + "");
+        gameView.setSelectedBoat(command);
+        placingBoat = true;
+        lastJButtonSelectionBoat = (JButton) e.getSource();
+        gameView.hideBoatSelectionButton(lastJButtonSelectionBoat);
+        // hide the boat button
+      } else if (placingBoat && command.charAt(0) == 'm') {
+        placingBoat = false;
+
+        JButton gridButton = (JButton) e.getSource();
+
+        // calculate the logical coordinates of the boat
+        int mapX = (int) gridButton.getLocation().getX() / gridButton.getWidth();
+        int mapY = (int) gridButton.getLocation().getY() / gridButton.getHeight();
+        boolean legal = placeBoatInMap(mapX, mapY, selectedBoatSize);
+
+        selectedBoatSize = -99;
+
+        if (legal) {
+          // ok
+          gameView.placeSelectedBoatInMap(gridButton.getLocation());
+        } else {
+          // undo the hide boat button
+          gameView.showBoatSelectionButton(lastJButtonSelectionBoat);
+          lastJButtonSelectionBoat = null;
+        }
+        gameView.unselectBoat();
+      }
     }
   }
 
@@ -95,8 +112,11 @@ public class GameController extends Controller {
     for (int w = 0; w < size; w++) {
       gameMap[x + w][y] = CellsStatus.boat;
     }
-    leftMapAliveBoatsCells += size;
-    leftMapBoats.add(boat);
+    if (leftMapboatsReady == false) {
+      leftMapAliveBoatsCells += size;
+    } else {
+      rightMapAliveBoatsCells += size;
+    }
     return true;
   }
 
