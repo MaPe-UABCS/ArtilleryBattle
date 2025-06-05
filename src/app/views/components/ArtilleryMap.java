@@ -260,6 +260,10 @@ public class ArtilleryMap extends JPanel {
     }
   }
 
+  public ArrayList<AbstractButton> getButtonsReference() {
+    return buttonsWithActionListener;
+  }
+
   public void setActionListener(ActionListener listener) {
     for (AbstractButton button : buttonsWithActionListener) {
       button.addActionListener(listener);

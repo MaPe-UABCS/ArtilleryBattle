@@ -1,6 +1,7 @@
 package app;
 
 import app.controllers.Controller;
+import app.controllers.GameController;
 import app.controllers.UserController;
 import app.models.MySQLConnection;
 import app.models.User;
@@ -82,7 +83,8 @@ public class Main extends JFrame {
     // Contorllers
     {
       controllers = new HashMap<String, Controller>();
-      controllers.put("User", new UserController());
+      controllers.put("UserController", new UserController());
+      controllers.put("GameController", new GameController());
     }
 
     // set setVisible

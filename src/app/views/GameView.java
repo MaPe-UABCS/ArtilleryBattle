@@ -9,16 +9,17 @@ import app.views.components.ArtilleryMap;
 import java.awt.BorderLayout;
 import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class GameView extends View implements ActionListener {
+public class GameView extends View {
 
   // History
   JPanel historyContainer;
@@ -26,9 +27,11 @@ public class GameView extends View implements ActionListener {
   Queue<ALabel> historyMoves;
 
   // drag&drop
-  boolean leftMapboatsReady;
+  JPanel indicatorsLayer;
+  ArrayList<JLabel> leftBoatsIndicators, rigthBoatsIndicators;
   JPanel boatsContainer;
   JLabel selectedBoat;
+  int selectedBoatSize;
   Animation dragAndDropAnimation;
   Point viewPositionOnScren;
 
@@ -39,7 +42,12 @@ public class GameView extends View implements ActionListener {
     historyMoves = new LinkedList<ALabel>();
     setBackground(Style.getColor(Style.background));
     setBounds(0, 0, 1300, 600);
+    indicatorsLayer = new JPanel();
+    indicatorsLayer.setLayout(null);
+    indicatorsLayer.setOpaque(false);
+    indicatorsLayer.setBounds(0, 0, 1300, 600);
 
+    add(indicatorsLayer);
     // LateralPanel
     JPanel lateralPanel = new JPanel(new BorderLayout());
     {
@@ -59,36 +67,46 @@ public class GameView extends View implements ActionListener {
     AnimationThread.registerAnimation(dragAndDropAnimation);
 
     // boatSelected in the drag and dorp thing
-    selectedBoat = new JLabel(AssetManager.getImageIcon("Boat3V.png"));
-    selectedBoat.setBounds(0, 0, 43, 43 * 3);
+    selectedBoat = new JLabel();
+    selectedBoat.setBounds(0, 0, 43 * 5, 43);
     selectedBoat.setOpaque(false);
+    selectedBoat.setHorizontalAlignment(JLabel.CENTER);
     add(selectedBoat);
+
+    // leftBoatsIndicators = new ArrayList<JLabel>();
+    // TODO: also for right
 
     // Boats selection
     boatsContainer = new JPanel(null);
     {
-      JButton boat5Button = new AnIconButton("Boat5H", this);
+      JButton boat5Button = new AnIconButton("Boat5H");
       boat5Button.setBounds(0, 0, 43 * 5, 43);
+      this.buttons.add(boat5Button);
       boatsContainer.add(boat5Button);
 
-      JButton boat3Button1 = new AnIconButton("Boat3H", this);
+      JButton boat3Button1 = new AnIconButton("Boat3H");
       boat3Button1.setBounds(43 * 5, 0, 43 * 3, 43);
+      this.buttons.add(boat3Button1);
       boatsContainer.add(boat3Button1);
 
-      JButton boat2Button = new AnIconButton("Boat2H", this);
+      JButton boat2Button = new AnIconButton("Boat2H");
       boat2Button.setBounds(43 * 8, 43, 43 * 2, 43);
+      this.buttons.add(boat2Button);
       boatsContainer.add(boat2Button);
 
-      JButton boat4Button = new AnIconButton("Boat4H", this);
+      JButton boat4Button = new AnIconButton("Boat4H");
       boat4Button.setBounds(0, 43, 43 * 4, 43);
+      this.buttons.add(boat4Button);
       boatsContainer.add(boat4Button);
 
-      JButton boat3Button2 = new AnIconButton("Boat3H", this);
+      JButton boat3Button2 = new AnIconButton("Boat3H");
       boat3Button2.setBounds(43 * 5, 43, 43 * 3, 43);
+      this.buttons.add(boat3Button2);
       boatsContainer.add(boat3Button2);
 
       AButton boatsReadyButton = new AButton("Ready", 20, AButton.lightPrimary);
       boatsReadyButton.setBounds(43 * 8, 0, 43 * 2, 43);
+      this.buttons.add(boatsReadyButton);
       boatsContainer.add(boatsReadyButton);
     }
     boatsContainer.setBounds(130, 30, 430, 43 * 2);
@@ -99,13 +117,18 @@ public class GameView extends View implements ActionListener {
     {
       leftMap = new ArtilleryMap(this);
       leftMap.setBounds(129, 130, 440, 440);
-      leftMap.setActionListener(this);
+      // leftMap.setActionListener(this);
+      for (AbstractButton mapButtons : leftMap.getButtonsReference()) {
+        this.buttons.add(mapButtons);
+      }
       add(leftMap);
 
       // rightMap = new ArtilleryMap();
       // rightMap.setBounds(500, 130, 430, 430);
       // add(rightMap);
     }
+    // TODO: do the same with rigth map
+
   }
 
   public void addMove2HistoryDisplay(String move) {
@@ -121,6 +144,7 @@ public class GameView extends View implements ActionListener {
 
   @Override
   public void before() {
+    this.leftBoatsIndicators = new ArrayList<JLabel>();
     leftMap.setUpAnimation();
     leftMap.setMapActive(true);
 
@@ -134,28 +158,54 @@ public class GameView extends View implements ActionListener {
     rightMap.setMapActive(false);
   }
 
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    System.out.println(e.getActionCommand());
+  public void setSelectedBoat(String boatName) {
+    int boatSize = Integer.parseInt(boatName.charAt(4) + "");
+    selectedBoatSize = boatSize;
+    selectedBoat.setBounds(0, 0, 43 * boatSize, 43);
+    selectedBoat.setIcon(AssetManager.getImageIcon(boatName + ".png"));
+    dragAndDropAnimation.play();
+  }
 
-    if (leftMapboatsReady) {
-      // TODO: remover this de la lista de acctions lisener del mapa
-      return;
+  public void unselectBoat() {
+    selectedBoat.setIcon(null);
+    dragAndDropAnimation.pause();
+  }
+
+  public void placeSelectedBoatInMap(Point gridButtonLocation) {
+    // JButton targetButton = (JButton) e.getSource();
+    // targetButton.getLocation();
+
+    // Preguntar al artilleryBattle si es legal la ubicaion
+
+    // TODO: crea un array list de JLaels que guardan los botes left y otro para rigth
+    // ademas de 2 metodos para ocultarl left y rigth
+    Icon indicatorIcon = selectedBoat.getIcon();
+    JLabel boatIndicator = new JLabel(indicatorIcon);
+
+    int indicatorX = leftMap.getX() + (int) gridButtonLocation.getX();
+    int indicatorY = leftMap.getY() + (int) gridButtonLocation.getY();
+
+    boatIndicator.setBounds(indicatorX, indicatorY, indicatorIcon.getIconWidth(), 43);
+    indicatorsLayer.add(boatIndicator);
+
+    dragAndDropAnimation.pause();
+    selectedBoat.setIcon(null);
+  }
+
+  public void hideBoats(boolean left) {
+    ArrayList<JLabel> boatsIndicator = left ? leftBoatsIndicators : rigthBoatsIndicators;
+
+    for (JLabel boatIndicator : boatsIndicator) {
+      boatsIndicator.remove(boatIndicator);
     }
-    ;
+  }
 
-    if (selectedBoat.getIcon() == null) {}
+  public void hideBoatSelectionButton(JButton button) {
+    boatsContainer.remove(button);
+  }
 
-    // if the user clicked on a button in the boats seupt thing, then get the boat skin and set the
-    // cursor following active
-
-    if (dragAndDropAnimation.isRunning()) {
-      dragAndDropAnimation.pause();
-      // remove the image in the selectedBoat
-      selectedBoat.setIcon(null);
-    } else {
-      dragAndDropAnimation.play();
-    }
+  public void showBoatSelectionButton(JButton button) {
+    boatsContainer.add(button);
   }
 
   private Animation boatsCursorFollowingAnimation() {
@@ -171,19 +221,17 @@ public class GameView extends View implements ActionListener {
           viewPositionOnScren.move(
               (int) getLocationOnScreen().getX(), (int) getLocationOnScreen().getY());
         } catch (Exception e) {
-          System.out.println("a");
+          System.out.println("aiuda");
           return;
         }
         Point cursorPosition = MouseInfo.getPointerInfo().getLocation();
 
         int x = (int) (cursorPosition.getX() - viewPositionOnScren.getX());
         int y = (int) (cursorPosition.getY() - viewPositionOnScren.getY());
-        selectedBoat.setLocation(x - selectedBoat.getWidth() / 2, y - selectedBoat.getHeight() / 2);
+        selectedBoat.setLocation(x, y - selectedBoat.getHeight() / 2);
       }
     };
   }
-
-  private void setCurrentBoatSkin(String boat) {}
 
   // BOATS!
   public String getBoatsLocation() {
