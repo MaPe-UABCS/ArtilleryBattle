@@ -2,7 +2,9 @@ package app.views;
 
 import app.AssetManager;
 import app.Style;
+import app.views.components.AButton;
 import app.views.components.ALabel;
+import app.views.components.AnIconButton;
 import app.views.components.ArtilleryMap;
 import java.awt.BorderLayout;
 import java.awt.MouseInfo;
@@ -24,7 +26,7 @@ public class GameView extends View implements ActionListener {
   Queue<ALabel> historyMoves;
 
   // drag&drop
-  boolean boatsReady;
+  boolean leftMapboatsReady;
   JPanel boatsContainer;
   JLabel selectedBoat;
   Animation dragAndDropAnimation;
@@ -55,34 +57,49 @@ public class GameView extends View implements ActionListener {
 
     dragAndDropAnimation = boatsCursorFollowingAnimation();
     AnimationThread.registerAnimation(dragAndDropAnimation);
-    // Boats
+
+    // boatSelected in the drag and dorp thing
+    selectedBoat = new JLabel(AssetManager.getImageIcon("Boat3V.png"));
+    selectedBoat.setBounds(0, 0, 43, 43 * 3);
+    selectedBoat.setOpaque(false);
+    add(selectedBoat);
+
+    // Boats selection
     boatsContainer = new JPanel(null);
     {
-      selectedBoat = new JLabel(AssetManager.getImageIcon("Boat3V.png"));
-      selectedBoat.setBounds(0, 0, 43, 43 * 3);
-      selectedBoat.setBackground(Style.getColor(Style.foreground));
-      selectedBoat.setOpaque(true);
-      boatsContainer.add(selectedBoat);
-
-      JButton boat5Button = new JButton(AssetManager.getImageIcon("Boat5H.png"));
-      boat5Button.setActionCommand("Boat5H");
-      boat5Button.setOpaque(false);
-      boat5Button.setBorderPainted(false);
-      boat5Button.setFocusPainted(false);
-      boat5Button.setContentAreaFilled(false);
-      boat5Button.setBounds(130, 36, 43 * 5, 43);
-      boat5Button.addActionListener(this);
+      JButton boat5Button = new AnIconButton("Boat5H", this);
+      boat5Button.setBounds(0, 0, 43 * 5, 43);
       boatsContainer.add(boat5Button);
+
+      JButton boat3Button1 = new AnIconButton("Boat3H", this);
+      boat3Button1.setBounds(43 * 5, 0, 43 * 3, 43);
+      boatsContainer.add(boat3Button1);
+
+      JButton boat2Button = new AnIconButton("Boat2H", this);
+      boat2Button.setBounds(43 * 8, 43, 43 * 2, 43);
+      boatsContainer.add(boat2Button);
+
+      JButton boat4Button = new AnIconButton("Boat4H", this);
+      boat4Button.setBounds(0, 43, 43 * 4, 43);
+      boatsContainer.add(boat4Button);
+
+      JButton boat3Button2 = new AnIconButton("Boat3H", this);
+      boat3Button2.setBounds(43 * 5, 43, 43 * 3, 43);
+      boatsContainer.add(boat3Button2);
+
+      AButton boatsReadyButton = new AButton("Ready", 20, AButton.lightPrimary);
+      boatsReadyButton.setBounds(43 * 8, 0, 43 * 2, 43);
+      boatsContainer.add(boatsReadyButton);
     }
-    boatsContainer.setOpaque(true);
-    boatsContainer.setBackground(Style.getColor(Style.primary));
-    boatsContainer.setBounds(0, 0, 600, 600);
+    boatsContainer.setBounds(130, 30, 430, 43 * 2);
+    boatsContainer.setOpaque(false);
     add(boatsContainer);
 
     // Map
     {
       leftMap = new ArtilleryMap(this);
-      leftMap.setBounds(129, 130, 430, 430);
+      leftMap.setBounds(129, 130, 440, 440);
+      leftMap.setActionListener(this);
       add(leftMap);
 
       // rightMap = new ArtilleryMap();
@@ -120,11 +137,22 @@ public class GameView extends View implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent e) {
     System.out.println(e.getActionCommand());
+
+    if (leftMapboatsReady) {
+      // TODO: remover this de la lista de acctions lisener del mapa
+      return;
+    }
+    ;
+
+    if (selectedBoat.getIcon() == null) {}
+
     // if the user clicked on a button in the boats seupt thing, then get the boat skin and set the
     // cursor following active
 
     if (dragAndDropAnimation.isRunning()) {
       dragAndDropAnimation.pause();
+      // remove the image in the selectedBoat
+      selectedBoat.setIcon(null);
     } else {
       dragAndDropAnimation.play();
     }
