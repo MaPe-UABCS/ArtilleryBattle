@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="/home/manu_lab/Documents/ArtilleryBattle/src/lib/slf4j-api-2.0.13.jar"/>
 	<classpathentry kind="lib" path="/home/manu_lab/Documents/ArtilleryBattle/src/lib/slf4j-simple-2.0.13.jar"/>
 	<classpathentry kind="lib" path="/home/manu_lab/Documents/ArtilleryBattle/src/lib/mysql-connector-java-8.0.20.jar"/>
+	<classpathentry kind="lib" path="/home/manu_lab/Documents/ArtilleryBattle/src/lib/jbcrypt-0.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
