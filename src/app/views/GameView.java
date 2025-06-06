@@ -24,7 +24,7 @@ public class GameView extends View {
 
   // History
   JPanel historyContainer;
-  int historySize = 27;
+  int historySize = 30;
   Queue<ALabel> historyMoves;
 
   // drag&drop
@@ -36,6 +36,9 @@ public class GameView extends View {
   int selectedBoatSize;
   Animation dragAndDropAnimation;
   Point viewPositionOnScren;
+
+  JPanel leftStatusContainer;
+  JPanel rigthStatusContiner;
 
   private ArtilleryMap leftMap, rightMap;
 
@@ -62,7 +65,7 @@ public class GameView extends View {
       lateralPanel.add(historyContainer);
     }
     lateralPanel.setOpaque(false);
-    lateralPanel.setBounds(5, 5, 97, 563);
+    lateralPanel.setBounds(5, 5, 150, 600);
     add(lateralPanel);
 
     dragAndDropAnimation = boatsCursorFollowingAnimation();
@@ -80,25 +83,34 @@ public class GameView extends View {
 
     // Boats selection
     leftBoatSelectionContainer = new JPanel(null);
-    leftBoatSelectionContainer.setBounds(130, 10, 440, 43 * 2);
+    leftBoatSelectionContainer.setOpaque(true);
+    leftBoatSelectionContainer.setBackground(Style.getColor(Style.background));
+    leftBoatSelectionContainer.setBounds(170, 10, 440, 43 * 2);
     leftBoatSelectionContainer.setBorder(
         BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
 
-    leftBoatSelectionContainer.setOpaque(false);
     generateBoatSelectionButtons(leftBoatSelectionContainer, "L");
+    // TODO: uncomment
     add(leftBoatSelectionContainer);
 
     rightBoatSelectionContainer = new JPanel(null);
     rightBoatSelectionContainer.setBorder(
         BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
-    rightBoatSelectionContainer.setBounds(700, 10, 440, 43 * 2);
+    rightBoatSelectionContainer.setBounds(660, 10, 440, 43 * 2);
     rightBoatSelectionContainer.setOpaque(false);
     generateBoatSelectionButtons(rightBoatSelectionContainer, "R");
     add(rightBoatSelectionContainer);
     // Map
     {
+      JLabel topRuleLeft = new JLabel(AssetManager.getImageIcon("TopRule.png"));
+      topRuleLeft.setBounds(170, 90, 440, 50);
+      add(topRuleLeft);
+      JLabel sideRuleLeft = new JLabel(AssetManager.getImageIcon("SideRule.png"));
+      sideRuleLeft.setBounds(138, 130, 40, 440);
+      add(sideRuleLeft);
+
       leftMap = new ArtilleryMap(this);
-      leftMap.setBounds(129, 130, 440, 440);
+      leftMap.setBounds(170, 130, 440, 440);
       leftMap.setSide("L");
       for (AbstractButton mapButtons : leftMap.getButtonsReference()) {
         this.buttons.add(mapButtons);
@@ -107,14 +119,31 @@ public class GameView extends View {
 
       rightMap = new ArtilleryMap(this);
       rightMap.setSide("R");
-      rightMap.setBounds(700, 130, 440, 440);
+      rightMap.setBounds(660, 130, 440, 440);
       for (AbstractButton mapButtons : rightMap.getButtonsReference()) {
         this.buttons.add(mapButtons);
       }
       add(rightMap);
     }
-    // TODO: do the same with rigth map
 
+    // player status things
+    leftStatusContainer = new JPanel(null);
+    // leftStatusContainer.setBorder(BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
+    leftStatusContainer.setBounds(170, 10, 440, 43 * 2);
+    leftStatusContainer.setOpaque(false);
+    addContentToStatusContainer(leftStatusContainer);
+    add(leftStatusContainer);
+
+    // side decoration
+    JLabel crossGridDecoration = new JLabel(AssetManager.getImageIcon("CrossGridBeam.png"));
+    crossGridDecoration.setBounds(1110, -14, 190, 600);
+    add(crossGridDecoration);
+  }
+
+  private void addContentToStatusContainer(JPanel container) {
+    JLabel title = new ALabel(" < Manu's Map >", 24, Style.foreground);
+    title.setBounds(0, 0, 440, 43);
+    container.add(title);
   }
 
   private void generateBoatSelectionButtons(JPanel container, String side) {
@@ -156,7 +185,7 @@ public class GameView extends View {
   }
 
   public void addMove2HistoryDisplay(String move) {
-    ALabel moveLabel = new ALabel(move, 15, Style.foreground);
+    ALabel moveLabel = new ALabel(move, 14, Style.foreground);
     historyMoves.add(moveLabel);
     if (historyMoves.size() > historySize) {
       ALabel topMove = historyMoves.poll();
@@ -289,6 +318,7 @@ public class GameView extends View {
     // seee para este punto deveria tener un variable que guarde el mapa aactivo
     ArtilleryMap map = side.equals("L") ? leftMap : rightMap;
     map.setCellStatus(x, y, ArtilleryMap.CellStatuses.hit);
+    map.repaint();
   }
 
   // deberia ser el mismo metodo pero ya no quiero pasar el enum hasta el controller
@@ -296,5 +326,6 @@ public class GameView extends View {
     // seee para este punto deveria tener un variable que guarde el mapa aactivo
     ArtilleryMap map = side.equals("L") ? leftMap : rightMap;
     map.setCellStatus(x, y, ArtilleryMap.CellStatuses.blank);
+    map.repaint();
   }
 }

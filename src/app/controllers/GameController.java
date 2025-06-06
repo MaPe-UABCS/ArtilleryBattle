@@ -19,6 +19,7 @@ public class GameController extends Controller {
   boolean singlePlayer;
   int turnCount;
   boolean leftPlayerTurn;
+  String moveHistory;
 
   // GAME MAP
   int leftGameMap[][];
@@ -55,10 +56,6 @@ public class GameController extends Controller {
     turnCount = 0;
     leftPlayerTurn = true;
 
-    // gameView.setMapActive("L", true);
-    // gameView.leftMap.setMapActive(true);
-    // gameView.setMapActive("R", false);
-
     for (int x = 0; x < 10; x++) {
       for (int y = 0; y < 10; y++) {
         leftGameMap[x][y] = CellsStatus.water;
@@ -67,7 +64,6 @@ public class GameController extends Controller {
   }
 
   public void gameOver(boolean leftWon) {
-    System.out.println("Game OVER" + leftWon);
 
     // TODO register the following data:
     //  clac points based on an inverse relation with the tourn count
@@ -88,10 +84,8 @@ public class GameController extends Controller {
 
   private void actionPerformedInMainMenu(ActionEvent e) {
     String command = e.getActionCommand().split(":")[1];
-    System.out.println(command);
     switch (command) {
       case "Single Player":
-        System.out.println("here");
         Main.changeView("Game");
         singlePlayer = true;
         leftMapboatsReady = false;
@@ -116,7 +110,8 @@ public class GameController extends Controller {
 
     // Place here the logic for  buttons to regurn to main menu, and play again
 
-    if (leftMapAliveBoatsCells == 0 || rightMapAliveBoatsCells == 0) {
+    if ((leftMapboatsReady && rightMapboatsReady)
+        && (leftMapAliveBoatsCells == 0 || rightMapAliveBoatsCells == 0)) {
 
       return;
     }
@@ -145,17 +140,29 @@ public class GameController extends Controller {
         // add to history
       }
 
-      if (side.equals("R")) {
+      boolean leftMove = side.equals("R");
+      if (leftMove) {
         rightGameMap[mapX][mapY] = cell2BombValue;
-        rightMapAliveBoatsCells--;
         gameView.setMapActive("L", true);
         gameView.setMapActive("R", false);
       } else {
         leftGameMap[mapX][mapY] = cell2BombValue;
-        leftMapAliveBoatsCells--;
         gameView.setMapActive("R", true);
         gameView.setMapActive("L", false);
       }
+
+      String move = leftMove ? Main.getCurrentUser().getName() : "seocnd";
+      String shootType = "blank";
+      if (cell2BombValue == CellsStatus.hit) {
+        if (leftMove) {
+          rightMapAliveBoatsCells--;
+        } else {
+          leftMapAliveBoatsCells--;
+        }
+        shootType = "hit";
+      }
+      move += ":" + (char) ((int) ('A') + mapX) + "," + mapY + ":" + shootType;
+      gameView.addMove2HistoryDisplay(move);
 
       // Check game over
       if (leftMapAliveBoatsCells == 0) {
@@ -171,6 +178,7 @@ public class GameController extends Controller {
     // Boat placement ====================================================
 
     if (command.equals("Ready")) {
+
       if (leftMapboatsReady == false && leftPlayerTurn) {
         leftMapboatsReady = leftMapAliveBoatsCells == 17;
         if (leftMapboatsReady) {
@@ -194,6 +202,8 @@ public class GameController extends Controller {
           }
         }
       }
+
+      leftPlayerTurn = !leftPlayerTurn;
     }
 
     if (!placingBoat && command.charAt(0) == 'B') {

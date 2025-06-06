@@ -60,10 +60,10 @@ public class ArtilleryMap extends JPanel {
     add(coordinatesLabel);
 
     // pause screen
-    pauseScreen = new JLabel("Waiting for Command autorization...");
+    pauseScreen = new JLabel(AssetManager.getImageIcon("wait.png"));
     pauseScreen.setOpaque(true);
     pauseScreen.setBorder(BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
-    pauseScreen.setBounds(0, 0, size-10, size-10);
+    pauseScreen.setBounds(0, 0, size, size);
     pauseScreen.setBackground(Color.black);
     pauseScreen.setForeground(Color.green);
 
@@ -98,7 +98,7 @@ public class ArtilleryMap extends JPanel {
       }
     }
     buttonsGrid.setBounds(0, 0, size, size);
-    add(buttonsGrid);
+    // add(buttonsGrid);
 
     // parallaxAnimation
     parallaxAnimation = parallaxAnimation();
@@ -180,6 +180,8 @@ public class ArtilleryMap extends JPanel {
     } else if (status == CellStatuses.blank) {
       buttonsMatrix[column][row].setAsBlank();
     }
+    revalidate();
+    repaint();
   }
 
   public void setUpAnimation() {
@@ -194,22 +196,14 @@ public class ArtilleryMap extends JPanel {
     if (active) {
       parallaxAnimation.play();
       remove(pauseScreen);
-      for (JLabel layer : layers) {
-        add(layer);
-      }
       add(buttonsGrid);
     } else {
-      // System.out.println("waigin ");
       parallaxAnimation.pause();
       remove(buttonsGrid);
-      for (JLabel layer : layers) {
-        remove(layer);
-      }
       add(pauseScreen);
-      // System.out.println("pause");
-      revalidate();
-      repaint();
     }
+    revalidate();
+    repaint();
   }
 
   private double clamp(double value, double min, double max) {
@@ -225,11 +219,11 @@ public class ArtilleryMap extends JPanel {
   private class GridButton extends JButton {
     public GridButton(int x, int y) {
       setActionCommand("map:" + x + "," + y);
-      // setOpaque(true);
+      setOpaque(false);
       // setContentAreaFilled(false);
       setBorderPainted(false);
       setFocusPainted(false);
-      setBackground(Color.black);
+      // setBackground(Color.black);
       // setBackground(Color.red);
     }
 

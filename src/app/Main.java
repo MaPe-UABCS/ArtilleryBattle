@@ -59,7 +59,7 @@ public class Main extends JFrame {
       // setSize(600 + getInsets().left + getInsets().right, 600 + getInsets().top +
       setLocationRelativeTo(null);
       setResizable(false);
-      setTitle("ArtilleryBattle");
+      setTitle("< Artillery Battle >");
       setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
