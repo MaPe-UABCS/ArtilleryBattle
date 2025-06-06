@@ -1,12 +1,28 @@
 package app.controllers;
 
 import app.Main;
+import app.models.BoatPlacements;
+import app.models.Game;
 import app.views.GameView;
 import app.views.View;
+import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.SolidBorder;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class GameController extends Controller {
 
@@ -18,8 +34,10 @@ public class GameController extends Controller {
 
   // gameMode
   boolean singlePlayer;
-  int turnCount;
+  // int turnCount;
   boolean leftPlayerTurn;
+  int leftTurnCount;
+  int rightTurnCount;
   String moveHistory;
 
   // GAME MAP
@@ -54,8 +72,13 @@ public class GameController extends Controller {
     leftMapboatsReady = false;
     rightMapboatsReady = false;
     rightMapAliveBoatsCells = 0;
-    turnCount = 0;
+    // turnCount = 0;
+    leftTurnCount = 0;
+    rightTurnCount = 0;
     leftPlayerTurn = true;
+    moveHistory = "";
+    leftBoats = new ArrayList<GameBoat>();
+    rightBoats = new ArrayList<GameBoat>();
 
     for (int x = 0; x < 10; x++) {
       for (int y = 0; y < 10; y++) {
@@ -66,12 +89,44 @@ public class GameController extends Controller {
 
   public void gameOver(boolean leftWon) {
 
-    // TODO register the following data:
-    //  clac points based on an inverse relation with the tourn count
-    //  save the winner
-    //  save the looser
-    //  save the move history
-    //  save the number of left boats of each player, not cells boats
+    int player1Hits = 17 - rightMapAliveBoatsCells;
+    int player1Blanks = leftTurnCount - player1Hits;
+    int player1MoveCount = leftTurnCount;
+    int player1Score = (999 * 17) / player1MoveCount;
+
+    int player2Hits = 17 - leftMapAliveBoatsCells;
+    int player2Blanks = rightTurnCount - player2Hits;
+    int player2MoveCount = rightTurnCount;
+    int player2Score = (999 * 17) / player2MoveCount;
+
+    int winnerId = leftWon ? Main.getCurrentUser().getId() : Main.getSecondUser().getId();
+
+    Game game =
+        new Game(
+            player2Score,
+            moveHistory,
+            winnerId,
+            Main.getCurrentUser().getId(),
+            player1Hits,
+            player1Blanks,
+            player1MoveCount,
+            player1Score,
+            Main.getSecondUser().getId(),
+            player2Hits,
+            player2Blanks,
+            player2MoveCount);
+    int gameId = game.save();
+    // save boat placement
+    String player1Placements = "";
+    for (GameBoat boat : leftBoats) {
+      player1Placements += "1:" + boat.size + ":" + boat.x + "," + boat.y + ".";
+    }
+    String player2Placements = "";
+    for (GameBoat boat : rightBoats) {
+      player2Placements += "2:" + boat.size + ":" + boat.x + "," + boat.y + ".";
+    }
+    BoatPlacements placements = new BoatPlacements(gameId, player1Placements, player2Placements);
+    placements.save();
 
     gameView.showBoats(true);
     gameView.showBoats(false);
@@ -79,12 +134,12 @@ public class GameController extends Controller {
     gameView.setMapActive("R", true);
     JOptionPane.showMessageDialog(
         Main.getCurrentView(),
-        leftWon ? Main.getCurrentUser().getName() : Main.getSecondUser().getName() + " Has Won!");
-    System.out.println("mainMenu goind");
+        (leftWon ? Main.getCurrentUser().getName() : Main.getSecondUser().getName()) + " Has Won!");
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
+
     if (Main.getCurrentView() == Main.getViewReference("MainMenu")) {
       actionPerformedInMainMenu(e);
     } else {
@@ -108,6 +163,9 @@ public class GameController extends Controller {
         break;
       case "LAN":
       // TODO: open Lan Menu and get ready UDT and TPC sockets
+      case "Report":
+        export();
+        break;
       default:
         break;
     }
@@ -153,9 +211,11 @@ public class GameController extends Controller {
       boolean leftMove = side.equals("R");
       if (leftMove) {
         rightGameMap[mapX][mapY] = cell2BombValue;
+        leftTurnCount++;
         gameView.setMapActive("L", true);
         gameView.setMapActive("R", false);
       } else {
+        rightTurnCount++;
         leftGameMap[mapX][mapY] = cell2BombValue;
         gameView.setMapActive("R", true);
         gameView.setMapActive("L", false);
@@ -175,6 +235,7 @@ public class GameController extends Controller {
       }
       move += ":" + (char) ((int) ('A') + mapX) + "," + mapY + ":" + shootType;
       gameView.addMove2HistoryDisplay(move);
+      moveHistory += move + ".";
 
       // Check game over
       if (leftMapAliveBoatsCells == 0) {
@@ -183,7 +244,6 @@ public class GameController extends Controller {
         gameOver(true);
       }
 
-      turnCount++;
       return;
     }
 
@@ -235,16 +295,21 @@ public class GameController extends Controller {
       int gameMap[][] = side.equals("L") ? leftGameMap : rightGameMap;
       boolean legal = placeBoatInMap(mapX, mapY, selectedBoatSize, gameMap);
 
-      selectedBoatSize = -99;
-
       if (legal) {
         // ok
         gameView.placeSelectedBoatInMap(gridButton.getLocation(), side.equals("L"));
+        if (side.equals("L")) {
+          leftBoats.add(new GameBoat(mapX, mapY, selectedBoatSize));
+        } else {
+          rightBoats.add(new GameBoat(mapX, mapY, selectedBoatSize));
+        }
       } else {
         // undo the hide boat button
         gameView.showBoatSelectionButton(lastJButtonSelectionBoat, side);
         lastJButtonSelectionBoat = null;
       }
+
+      selectedBoatSize = -99;
       gameView.unselectBoat();
     }
   }
@@ -291,6 +356,98 @@ public class GameController extends Controller {
       this.y = y;
       this.size = size;
       alive = true;
+    }
+  }
+
+  private void export() {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    fileChooser.setAcceptAllFileFilterUsed(false);
+    FileNameExtensionFilter pdfs = new FileNameExtensionFilter("Documentos PDF", "pdf");
+    fileChooser.addChoosableFileFilter(pdfs);
+    fileChooser.setFileFilter(pdfs);
+
+    int option = fileChooser.showDialog(null, "generate PDF");
+    if (option == JFileChooser.CANCEL_OPTION) {
+      return;
+    }
+
+    try (PdfDocument pdfDoc = new PdfDocument(new PdfWriter(fileChooser.getSelectedFile()));
+        Document doc = new Document(pdfDoc, PageSize.LETTER.rotate()); // Página en
+        ) {
+      doc.add(new Paragraph("Artillery Battle Data Report").setBold().setFontSize(22));
+      doc.add(new Paragraph("").setMarginTop(30));
+
+      float columnsWidth[] = new float[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+      Table gamesTable =
+          new Table(UnitValue.createPercentArray(columnsWidth)).useAllAvailableWidth();
+
+      Cell[] headerFooter =
+          new Cell[] {
+            // new ReportHeaderCell("Moves"),
+            new ReportHeaderCell("Player 1"),
+            new ReportHeaderCell("P1 hits"),
+            new ReportHeaderCell("P1 blanks"),
+            new ReportHeaderCell("P1 moves"),
+            new ReportHeaderCell("P1 Score"),
+            new ReportHeaderCell("Player 2"),
+            new ReportHeaderCell("P2 hits"),
+            new ReportHeaderCell("P2 blanks"),
+            new ReportHeaderCell("P2 moves"),
+            new ReportHeaderCell("P2 Score"),
+            new ReportHeaderCell("Winer")
+          };
+
+      for (Cell cell : headerFooter) {
+        gamesTable.addHeaderCell(cell);
+      }
+
+      for (Game game : Game.all()) {
+        // gamesTable.addCell(new ReportCell(game.getMoves()));
+
+        gamesTable.addCell(new ReportCell(game.getPlayer1Id()));
+        gamesTable.addCell(new ReportCell(game.getPlayer1Hits()));
+        gamesTable.addCell(new ReportCell(game.getPlayer1Blanks()));
+        gamesTable.addCell(new ReportCell(game.getPlayer1MoveCount()));
+        gamesTable.addCell(new ReportCell(game.getPlayer1Score()));
+
+        gamesTable.addCell(new ReportCell(game.getPlayer2Id()));
+        gamesTable.addCell(new ReportCell(game.getPlayer2Hits()));
+        gamesTable.addCell(new ReportCell(game.getPlayer2Blanks()));
+        gamesTable.addCell(new ReportCell(game.getPlayer2MoveCount()));
+        gamesTable.addCell(new ReportCell(game.getPlayer2Score()));
+
+        gamesTable.addCell(new ReportCell(game.getWinnerId()));
+      }
+
+      doc.add(gamesTable);
+    } catch (IOException ex) {
+      System.out.println(ex.getMessage());
+      ex.printStackTrace();
+      JOptionPane.showMessageDialog(null, "Error exporting to PDF");
+    }
+  }
+
+  private class ReportHeaderCell extends Cell {
+    public ReportHeaderCell(String text) {
+      setTextAlignment(TextAlignment.CENTER);
+      setBorderTop(new SolidBorder(1f));
+      setBackgroundColor(new DeviceRgb(200, 200, 200));
+      add(new Paragraph(text));
+    }
+  }
+
+  private class ReportCell extends Cell {
+    public ReportCell(String text) {
+      setTextAlignment(TextAlignment.CENTER);
+      Paragraph paragraph = new Paragraph(text);
+      add(paragraph);
+    }
+
+    public ReportCell(int value) {
+      setTextAlignment(TextAlignment.CENTER);
+      Paragraph paragraph = new Paragraph(value + "");
+      add(paragraph);
     }
   }
 }

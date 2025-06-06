@@ -3,6 +3,7 @@ package app;
 import app.controllers.Controller;
 import app.controllers.GameController;
 import app.controllers.UserController;
+import app.models.Game;
 import app.models.MySQLConnection;
 import app.models.User;
 import app.views.AnimationThread;
@@ -150,5 +151,7 @@ public class Main extends JFrame {
 
   public static void main(String[] args) {
     new Main();
+
+    System.out.println(Game.all().size());
   }
 }

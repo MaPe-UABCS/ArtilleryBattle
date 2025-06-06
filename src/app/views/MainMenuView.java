@@ -60,7 +60,7 @@ public class MainMenuView extends View {
       registerButton(twoPlayerButton);
       uiContainer.add(twoPlayerButton);
 
-      AButton lanButton = new AButton("LAN Multiplayer", buttonsFontCommand, AButton.lightPrimary);
+      AButton lanButton = new AButton("Report", buttonsFontCommand, AButton.lightPrimary);
       lanButton.setHorizontalAlignment(SwingConstants.CENTER);
       lanButton.setBounds(24, 280, 150, 30);
       registerButton(lanButton);
