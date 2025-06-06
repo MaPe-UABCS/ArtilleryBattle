@@ -98,7 +98,7 @@ public class ArtilleryMap extends JPanel {
       }
     }
     buttonsGrid.setBounds(0, 0, size, size);
-    // add(buttonsGrid);
+    add(buttonsGrid);
 
     // parallaxAnimation
     parallaxAnimation = parallaxAnimation();
@@ -219,11 +219,11 @@ public class ArtilleryMap extends JPanel {
   private class GridButton extends JButton {
     public GridButton(int x, int y) {
       setActionCommand("map:" + x + "," + y);
-      setOpaque(false);
+      // setOpaque(true);
       // setContentAreaFilled(false);
       setBorderPainted(false);
       setFocusPainted(false);
-      // setBackground(Color.black);
+      setBackground(Color.black);
       // setBackground(Color.red);
     }
 

@@ -6,6 +6,7 @@ import app.views.components.AButton;
 import app.views.components.ALabel;
 import app.views.components.AnIconButton;
 import app.views.components.ArtilleryMap;
+import app.views.components.MapHeader;
 import java.awt.BorderLayout;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -37,8 +38,8 @@ public class GameView extends View {
   Animation dragAndDropAnimation;
   Point viewPositionOnScren;
 
-  JPanel leftStatusContainer;
-  JPanel rigthStatusContiner;
+  public MapHeader leftStatusContainer;
+  public MapHeader rigthStatusContiner;
 
   private ArtilleryMap leftMap, rightMap;
 
@@ -78,19 +79,15 @@ public class GameView extends View {
     selectedBoat.setHorizontalAlignment(JLabel.CENTER);
     add(selectedBoat);
 
-    // leftBoatsIndicators = new ArrayList<JLabel>();
-    // TODO: also for right
-
     // Boats selection
     leftBoatSelectionContainer = new JPanel(null);
-    leftBoatSelectionContainer.setOpaque(true);
+    leftBoatSelectionContainer.setOpaque(false);
     leftBoatSelectionContainer.setBackground(Style.getColor(Style.background));
     leftBoatSelectionContainer.setBounds(170, 10, 440, 43 * 2);
     leftBoatSelectionContainer.setBorder(
         BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
 
     generateBoatSelectionButtons(leftBoatSelectionContainer, "L");
-    // TODO: uncomment
     add(leftBoatSelectionContainer);
 
     rightBoatSelectionContainer = new JPanel(null);
@@ -127,23 +124,18 @@ public class GameView extends View {
     }
 
     // player status things
-    leftStatusContainer = new JPanel(null);
-    // leftStatusContainer.setBorder(BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
+    leftStatusContainer = new MapHeader(false);
     leftStatusContainer.setBounds(170, 10, 440, 43 * 2);
-    leftStatusContainer.setOpaque(false);
-    addContentToStatusContainer(leftStatusContainer);
     add(leftStatusContainer);
+
+    rigthStatusContiner = new MapHeader(true);
+    rigthStatusContiner.setBounds(660, 10, 440, 43 * 2);
+    add(rigthStatusContiner);
 
     // side decoration
     JLabel crossGridDecoration = new JLabel(AssetManager.getImageIcon("CrossGridBeam.png"));
     crossGridDecoration.setBounds(1110, -14, 190, 600);
     add(crossGridDecoration);
-  }
-
-  private void addContentToStatusContainer(JPanel container) {
-    JLabel title = new ALabel(" < Manu's Map >", 24, Style.foreground);
-    title.setBounds(0, 0, 440, 43);
-    container.add(title);
   }
 
   private void generateBoatSelectionButtons(JPanel container, String side) {

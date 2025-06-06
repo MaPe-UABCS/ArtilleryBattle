@@ -69,8 +69,13 @@ public class UserController extends Controller {
 
     MainMenuView menuView = (MainMenuView) Main.getViewReference("MainMenu");
     menuView.setLoggedTag(user.getName());
-    Main.setCurrentUser(user);
-    Main.changeView("MainMenu");
+    if(Main.getCurrentUser() == null){
+      Main.setCurrentUser(user);
+      Main.changeView("MainMenu");
+    }else{
+      Main.setSecondUser(user);
+      Main.changeView("Game");
+    }
   }
 
   private boolean validFormData(String user, String password) {

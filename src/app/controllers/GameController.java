@@ -92,7 +92,7 @@ public class GameController extends Controller {
         gameView.hideBoatSelectionContainer("R");
         break;
       case "2 Players":
-        Main.changeView("Game");
+        Main.changeView("Login");
         singlePlayer = false;
         // gameView.hideBoatSelectionContainer("R");
         break;
@@ -156,8 +156,10 @@ public class GameController extends Controller {
       if (cell2BombValue == CellsStatus.hit) {
         if (leftMove) {
           rightMapAliveBoatsCells--;
+          gameView.rigthStatusContiner.setHitsTookCount(17 - rightMapAliveBoatsCells);
         } else {
           leftMapAliveBoatsCells--;
+          gameView.leftStatusContainer.setHitsTookCount(17 - leftMapAliveBoatsCells);
         }
         shootType = "hit";
       }

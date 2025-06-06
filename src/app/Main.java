@@ -29,6 +29,16 @@ public class Main extends JFrame {
   private View currentView;
   private User currentUser;
 
+  public static User getSecondUser() {
+    return sharedInstance.secondUser;
+  }
+
+  public static void setSecondUser(User secondUser) {
+    sharedInstance.secondUser = secondUser;
+  }
+
+  private User secondUser;
+
   public static User getCurrentUser() {
     return sharedInstance.currentUser;
   }
@@ -97,9 +107,9 @@ public class Main extends JFrame {
     // TODO: check the prefs an see if the user has logged in before, if so load
     // main Menu else
     // login screen
-    changeView("MainMenu");
+    changeView("Login");
     // TODO: eliminar esto aes para debugg
-    currentUser = User.find("manu");
+    // currentUser = User.find("manu");
   }
 
   public static View getViewReference(String viewName) {
