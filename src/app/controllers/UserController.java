@@ -34,6 +34,11 @@ public class UserController extends Controller {
       case "Skip":
         MainMenuView menuView = (MainMenuView) Main.getViewReference("MainMenu");
         menuView.setLoggedTag("Guess");
+        if (Main.getCurrentUser() != null) {
+          Main.setSecondUser(User.find("Guess"));
+          Main.changeView("Game");
+          return;
+        }
         Main.setCurrentUser(User.find("Guess"));
         Main.changeView("MainMenu");
         break;
@@ -69,10 +74,10 @@ public class UserController extends Controller {
 
     MainMenuView menuView = (MainMenuView) Main.getViewReference("MainMenu");
     menuView.setLoggedTag(user.getName());
-    if(Main.getCurrentUser() == null){
+    if (Main.getCurrentUser() == null) {
       Main.setCurrentUser(user);
       Main.changeView("MainMenu");
-    }else{
+    } else {
       Main.setSecondUser(user);
       Main.changeView("Game");
     }

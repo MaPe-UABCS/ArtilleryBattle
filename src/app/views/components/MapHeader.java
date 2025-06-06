@@ -13,10 +13,11 @@ public class MapHeader extends JPanel {
   public MapHeader(boolean art) {
 
     JLabel corner = new JLabel(!art ? "    :)" : "      >:|");
-    corner.setForeground(Style.getColor(Style.background));
+    corner.setForeground(Style.getColor(Style.foreground));
     corner.setOpaque(true);
-    corner.setBackground(Style.getColor(Style.foreground));
+    corner.setBackground(Style.getColor(Style.background));
     corner.setBounds(43 * 8, 0, 43 * 2 + 10, 43);
+    corner.setBorder(BorderFactory.createLineBorder(Style.getColor(Style.foreground)));
     add(corner);
 
     setOpaque(false);

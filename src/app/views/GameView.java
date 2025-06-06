@@ -54,6 +54,11 @@ public class GameView extends View {
     indicatorsLayer.setBounds(0, 0, 1300, 600);
 
     add(indicatorsLayer);
+
+    AButton exitButton = new AButton("Exit", 12, AButton.lightPrimary);
+    exitButton.setBounds(615, 10, 40, 20);
+    add(exitButton);
+
     // LateralPanel
     JPanel lateralPanel = new JPanel(new BorderLayout());
     {
@@ -113,6 +118,13 @@ public class GameView extends View {
         this.buttons.add(mapButtons);
       }
       add(leftMap);
+
+      JLabel topRuleR = new JLabel(AssetManager.getImageIcon("TopRule.png"));
+      topRuleR.setBounds(660, 90, 440, 50);
+      add(topRuleR);
+      JLabel sideRuleR = new JLabel(AssetManager.getImageIcon("SideRule.png"));
+      sideRuleR.setBounds(660 - (170 - 138), 130, 40, 440);
+      add(sideRuleR);
 
       rightMap = new ArtilleryMap(this);
       rightMap.setSide("R");

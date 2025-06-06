@@ -6,6 +6,7 @@ import app.views.View;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 public class GameController extends Controller {
 
@@ -71,6 +72,15 @@ public class GameController extends Controller {
     //  save the looser
     //  save the move history
     //  save the number of left boats of each player, not cells boats
+
+    gameView.showBoats(true);
+    gameView.showBoats(false);
+    gameView.setMapActive("L", true);
+    gameView.setMapActive("R", true);
+    JOptionPane.showMessageDialog(
+        Main.getCurrentView(),
+        leftWon ? Main.getCurrentUser().getName() : Main.getSecondUser().getName() + " Has Won!");
+    System.out.println("mainMenu goind");
   }
 
   @Override
@@ -151,7 +161,7 @@ public class GameController extends Controller {
         gameView.setMapActive("L", false);
       }
 
-      String move = leftMove ? Main.getCurrentUser().getName() : "seocnd";
+      String move = leftMove ? Main.getCurrentUser().getName() : Main.getSecondUser().getName();
       String shootType = "blank";
       if (cell2BombValue == CellsStatus.hit) {
         if (leftMove) {
