@@ -107,7 +107,7 @@ public class GameView extends View {
 
       rightMap = new ArtilleryMap(this);
       rightMap.setSide("R");
-      rightMap.setBounds(700, 130, 440, 430);
+      rightMap.setBounds(700, 130, 440, 440);
       for (AbstractButton mapButtons : rightMap.getButtonsReference()) {
         this.buttons.add(mapButtons);
       }
@@ -285,8 +285,16 @@ public class GameView extends View {
     };
   }
 
-  // BOATS!
-  public String getBoatsLocation() {
-    return "player1:x:y";
+  public void markHitInMap(String side, int x, int y) {
+    // seee para este punto deveria tener un variable que guarde el mapa aactivo
+    ArtilleryMap map = side.equals("L") ? leftMap : rightMap;
+    map.setCellStatus(x, y, ArtilleryMap.CellStatuses.hit);
+  }
+
+  // deberia ser el mismo metodo pero ya no quiero pasar el enum hasta el controller
+  public void markBlankInMap(String side, int x, int y) {
+    // seee para este punto deveria tener un variable que guarde el mapa aactivo
+    ArtilleryMap map = side.equals("L") ? leftMap : rightMap;
+    map.setCellStatus(x, y, ArtilleryMap.CellStatuses.blank);
   }
 }

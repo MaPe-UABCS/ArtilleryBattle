@@ -4,6 +4,7 @@ import app.Main;
 import app.views.GameView;
 import app.views.View;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import javax.swing.JButton;
 
 public class GameController extends Controller {
@@ -16,6 +17,8 @@ public class GameController extends Controller {
 
   // gameMode
   boolean singlePlayer;
+  int turnCount;
+  boolean leftPlayerTurn;
 
   // GAME MAP
   int leftGameMap[][];
@@ -23,11 +26,13 @@ public class GameController extends Controller {
   // left
   boolean leftMapboatsReady;
   int leftMapAliveBoatsCells;
+  ArrayList<GameBoat> leftBoats;
   // Both
   JButton lastJButtonSelectionBoat;
   // right
   boolean rightMapboatsReady;
   int rightMapAliveBoatsCells;
+  ArrayList<GameBoat> rightBoats;
 
   public GameController() {
     // Main menu setup
@@ -47,6 +52,8 @@ public class GameController extends Controller {
     leftMapboatsReady = false;
     rightMapboatsReady = false;
     rightMapAliveBoatsCells = 0;
+    turnCount = 0;
+    leftPlayerTurn = true;
 
     // gameView.setMapActive("L", true);
     // gameView.leftMap.setMapActive(true);
@@ -57,6 +64,17 @@ public class GameController extends Controller {
         leftGameMap[x][y] = CellsStatus.water;
       }
     }
+  }
+
+  public void gameOver(boolean leftWon) {
+    System.out.println("Game OVER" + leftWon);
+
+    // TODO register the following data:
+    //  clac points based on an inverse relation with the tourn count
+    //  save the winner
+    //  save the looser
+    //  save the move history
+    //  save the number of left boats of each player, not cells boats
   }
 
   @Override
@@ -85,7 +103,7 @@ public class GameController extends Controller {
         // gameView.hideBoatSelectionContainer("R");
         break;
       case "LAN":
-      // TODO: open Lan Menu
+      // TODO: open Lan Menu and get ready UDT and TPC sockets
       default:
         break;
     }
@@ -96,82 +114,116 @@ public class GameController extends Controller {
     String side = commandArray[0];
     String command = commandArray[1];
 
-    if (leftMapboatsReady && rightMapboatsReady) {
-      // TODO: handle shooting
+    // Place here the logic for  buttons to regurn to main menu, and play again
+
+    if (leftMapAliveBoatsCells == 0 || rightMapAliveBoatsCells == 0) {
 
       return;
     }
 
-    // And not in game
-    // if (side.equals("L") && leftMapboatsReady) {
-    //   return;
-    // }
+    int currentGameMap[][] = side.equals("L") ? leftGameMap : rightGameMap;
 
-    if (leftMapboatsReady == false || rightMapboatsReady == false) {
+    JButton gridButton = (JButton) e.getSource();
 
-      if (command.equals("Ready")) {
+    // calculate the logical coordinates of the click
+    int mapX = (int) gridButton.getLocation().getX() / gridButton.getWidth();
+    int mapY = (int) gridButton.getLocation().getY() / gridButton.getHeight();
 
-        if (leftMapboatsReady == false && side.equals("L")) {
-          leftMapboatsReady = leftMapAliveBoatsCells == 17;
-          if (leftMapboatsReady) {
-            // hide left and enable right
+    if (leftMapboatsReady && rightMapboatsReady) {
+      int cell2BombValue = currentGameMap[mapX][mapY];
+      if (cell2BombValue == CellsStatus.hit || cell2BombValue == CellsStatus.blank) {
+        return;
+      }
 
-            if (!singlePlayer) {
-              gameView.hideBoats(true);
-            }
-            gameView.hideBoatSelectionContainer("L");
-            gameView.setMapActive("L", false);
-            gameView.setMapActive("R", true);
+      if (cell2BombValue == CellsStatus.boat) {
+        gameView.markHitInMap(side, mapX, mapY);
+        cell2BombValue = CellsStatus.hit;
+        // add to history
+      } else if (cell2BombValue == CellsStatus.water) {
+        gameView.markBlankInMap(side, mapX, mapY);
+        cell2BombValue = CellsStatus.blank;
+        // add to history
+      }
+
+      if (side.equals("R")) {
+        rightGameMap[mapX][mapY] = cell2BombValue;
+        rightMapAliveBoatsCells--;
+        gameView.setMapActive("L", true);
+        gameView.setMapActive("R", false);
+      } else {
+        leftGameMap[mapX][mapY] = cell2BombValue;
+        leftMapAliveBoatsCells--;
+        gameView.setMapActive("R", true);
+        gameView.setMapActive("L", false);
+      }
+
+      // Check game over
+      if (leftMapAliveBoatsCells == 0) {
+        gameOver(false);
+      } else if (rightMapAliveBoatsCells == 0) {
+        gameOver(true);
+      }
+
+      turnCount++;
+      return;
+    }
+
+    // Boat placement ====================================================
+
+    if (command.equals("Ready")) {
+      if (leftMapboatsReady == false && leftPlayerTurn) {
+        leftMapboatsReady = leftMapAliveBoatsCells == 17;
+        if (leftMapboatsReady) {
+          // hide left and enable right
+
+          if (!singlePlayer) {
+            gameView.hideBoats(true);
           }
-        } else if (rightMapboatsReady == false && side.equals("R")) {
-          rightMapboatsReady = rightMapAliveBoatsCells == 17;
-          if (rightMapboatsReady) {
-            if (!singlePlayer) {
-              gameView.hideBoats(false);
-              gameView.hideBoatSelectionContainer("R");
-              System.out.println("oculatndo barcos");
-            } else {
-              // lave to later
-            }
+          gameView.hideBoatSelectionContainer("L");
+          gameView.setMapActive("L", false);
+          gameView.setMapActive("R", true);
+        }
+      } else if (rightMapboatsReady == false && !leftPlayerTurn) {
+        rightMapboatsReady = rightMapAliveBoatsCells == 17;
+        if (rightMapboatsReady) {
+          if (!singlePlayer) {
+            gameView.hideBoats(false);
+            gameView.hideBoatSelectionContainer("R");
+          } else {
+            // lave to later
           }
         }
       }
+    }
 
-      if (!placingBoat && command.charAt(0) == 'B') {
-        if (side.equals("R") && !leftMapboatsReady) {
-          return;
-        }
-
-        selectedBoatSize = Integer.parseInt(command.charAt(4) + "");
-        gameView.setSelectedBoat(command);
-        placingBoat = true;
-        lastJButtonSelectionBoat = (JButton) e.getSource();
-        gameView.hideBoatSelectionButton(lastJButtonSelectionBoat, side);
-
-      } else if (placingBoat && command.charAt(0) == 'm') {
-
-        placingBoat = false;
-
-        JButton gridButton = (JButton) e.getSource();
-        // calculate the logical coordinates of the boat
-        int mapX = (int) gridButton.getLocation().getX() / gridButton.getWidth();
-        int mapY = (int) gridButton.getLocation().getY() / gridButton.getHeight();
-
-        int gameMap[][] = side.equals("L") ? leftGameMap : rightGameMap;
-        boolean legal = placeBoatInMap(mapX, mapY, selectedBoatSize, gameMap);
-
-        selectedBoatSize = -99;
-
-        if (legal) {
-          // ok
-          gameView.placeSelectedBoatInMap(gridButton.getLocation(), side.equals("L"));
-        } else {
-          // undo the hide boat button
-          gameView.showBoatSelectionButton(lastJButtonSelectionBoat, side);
-          lastJButtonSelectionBoat = null;
-        }
-        gameView.unselectBoat();
+    if (!placingBoat && command.charAt(0) == 'B') {
+      if (side.equals("R") && !leftMapboatsReady) {
+        return;
       }
+
+      selectedBoatSize = Integer.parseInt(command.charAt(4) + "");
+      gameView.setSelectedBoat(command);
+      placingBoat = true;
+      lastJButtonSelectionBoat = (JButton) e.getSource();
+      gameView.hideBoatSelectionButton(lastJButtonSelectionBoat, side);
+
+    } else if (placingBoat && command.charAt(0) == 'm') {
+      placingBoat = false;
+
+      int gameMap[][] = side.equals("L") ? leftGameMap : rightGameMap;
+      boolean legal = placeBoatInMap(mapX, mapY, selectedBoatSize, gameMap);
+
+      selectedBoatSize = -99;
+
+      if (legal) {
+        // ok
+        gameView.placeSelectedBoatInMap(gridButton.getLocation(), side.equals("L"));
+      } else {
+        // undo the hide boat button
+        gameView.showBoatSelectionButton(lastJButtonSelectionBoat, side);
+        lastJButtonSelectionBoat = null;
+      }
+      gameView.unselectBoat();
     }
   }
 
@@ -186,6 +238,7 @@ public class GameController extends Controller {
 
     // all right make the changes
     GameBoat boat = new GameBoat(x, y, size);
+
     for (int w = 0; w < size; w++) {
       map[x + w][y] = CellsStatus.boat;
     }
@@ -209,11 +262,13 @@ public class GameController extends Controller {
     int x;
     int y;
     int size;
+    boolean alive;
 
     public GameBoat(int x, int y, int size) {
       this.x = x;
       this.y = y;
       this.size = size;
+      alive = true;
     }
   }
 }
